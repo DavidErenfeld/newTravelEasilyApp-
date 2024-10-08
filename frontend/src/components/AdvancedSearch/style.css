@@ -1,0 +1,17 @@
+.advanced-search-section {
+  margin-top: 14rem;
+}
+
+.btn-m.try-again {
+  position: absolute;
+  top: 3.6rem;
+  left: 60rem;
+  z-index: 20000;
+}
+
+/*480*/
+@media (max-width: 30em) {
+  .advanced-search-section {
+    margin-top: 23rem;
+  }
+}

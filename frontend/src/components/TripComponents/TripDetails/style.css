@@ -1,0 +1,94 @@
+.main-card-section {
+  position: relative;
+  padding: 5rem;
+  padding-top: 7rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  background-color: #032233;
+  border-radius: 9px;
+  width: 100%;
+}
+
+.m-margin {
+  margin-top: 14rem;
+}
+
+.imeges-section {
+  margin-top: 12rem;
+}
+
+.main-card-section > .tags {
+  top: 1rem;
+  right: 0rem;
+  background-color: #032233;
+}
+
+.images-container {
+  width: 100%;
+}
+
+.card-nav {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: 3rem;
+  align-self: flex-start;
+}
+
+.details-container {
+  width: 100%;
+  min-height: 5rem;
+  border-radius: 9px;
+  font-size: 1.6rem;
+  text-align: start;
+  padding: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+}
+
+.details-container > button {
+  align-self: flex-end;
+  background: #bae6fd;
+  color: #232d59;
+}
+
+.details-container > button:hover {
+  background: #00a8ff;
+  color: #fff;
+}
+
+/*640*/
+@media (max-width: 40em) {
+  .main-card-section {
+    position: relative;
+    padding: 2rem;
+    padding-top: 2rem;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    border-radius: 4px;
+    width: 100%;
+  }
+
+  .m-margin {
+    margin-top: 18rem;
+  }
+}
+
+/*480*/
+@media (max-width: 30em) {
+  .main-card-section {
+    position: relative;
+    padding: 0.2rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    background-color: #042d43;
+  }
+
+  .main-card-section .tags {
+    right: 1rem;
+  }
+}

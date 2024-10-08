@@ -1,0 +1,109 @@
+.carousel-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3rem;
+  padding-left: 5rem;
+  padding-right: 5rem;
+}
+
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  gap: 1rem;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-image {
+  position: relative;
+  max-height: 200px;
+  height: auto;
+  margin-right: 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.carousel-image:hover {
+  transform: scale(1.05);
+  border-radius: 9px;
+}
+
+.carousel-image:last-child {
+  margin-right: 0;
+}
+
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 14;
+  cursor: pointer;
+  font-size: 24px;
+  padding: 10px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+}
+
+.scroll-button.left {
+  left: 10px;
+}
+
+.scroll-button.right {
+  right: 10px;
+}
+
+.img-container {
+  position: relative;
+}
+
+.delete-icon {
+  color: #fff;
+  font-size: 3rem;
+  padding: 0.5rem;
+  background-color: #6edf23;
+  position: absolute;
+  bottom: 6px;
+  right: 15px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-icon:hover {
+  background-color: #ff010196;
+}
+
+/*480*/
+@media (max-width: 30em) {
+  .carousel-container {
+    padding: 2rem;
+  }
+  .carousel-image {
+    max-width: 38rem;
+    height: 19rem;
+    border-radius: 7px;
+  }
+}
+
+/*480*/
+@media (max-width: 22em) {
+  .carousel-container {
+    padding: 1rem;
+  }
+  .carousel-image {
+    max-width: 38rem;
+    height: 19rem;
+    border-radius: 7px;
+  }
+}

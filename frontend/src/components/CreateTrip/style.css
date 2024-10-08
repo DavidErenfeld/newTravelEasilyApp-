@@ -1,0 +1,22 @@
+.create-trip-section {
+  margin-top: 16rem;
+  padding-bottom: 9.6rem;
+  position: relative;
+}
+
+.update-trip-description::placeholder {
+  color: #fff;
+}
+
+.text-area {
+  position: relative;
+}
+.add-image-icon {
+  position: absolute;
+  top: 2.2rem;
+  right: 8.8rem;
+}
+
+.submit-trip-btn {
+  margin-bottom: 3rem;
+}

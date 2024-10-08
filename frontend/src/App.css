@@ -1,7 +1,191 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/*************************
+ # FLEX-BOX TYPES
+**************************/
+
+.flex-center-gap-s {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
+.flex-center-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.flex-stretch-column-gap {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.flex-center-column-gap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.flex-space-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-center-column-large-gap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/*************************
+# BUTTON-TYPES
+**************************/
+.btn-container-gap-m {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-el {
+  font-size: 2rem;
+  padding: 10px 10px;
+  width: 20rem;
+  border-radius: 9px;
+  background: #00a8ff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn-el:hover {
+  background-color: #007bbf;
+}
+
+.btn-m,
+.btn-l {
+  font-size: 1.6rem;
+  padding: 8px 8px;
+  width: 20rem;
+  border-radius: 9px;
+  background: #00a8ff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn-m {
+  padding: 6px;
+  width: 10rem;
+  border-radius: 6px;
+  font-weight: 400;
+}
+.btn-m:hover,
+.btn-l:hover {
+  background: #bae6fd;
+  transition: all 0.4s;
+  color: #232d59;
+}
+
+.mode-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1.4rem;
+}
+
+/*************************
+# INPUT-TYPES
+**************************/
+input {
+  border-radius: 7px;
+  height: 4rem;
+  width: 100%;
+  padding: 7px;
+  border: none;
+  background-color: #e0f2fe;
+}
+
+input:focus {
+  outline: none;
+}
+
+.text-danger {
+  color: red;
+  text-align: start;
+}
+
+.error-message {
+  color: #ff5151;
+  font-size: 1.2rem;
+  margin-top: 5px;
+}
+
+/*************************
+# ICONS
+**************************/
+.icon {
+  cursor: pointer;
+}
+.drop-list-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+.add-img-icon {
+  stroke: #fff;
+  transition: all 0.2s;
+}
+
+.add-img-icon:hover {
+  stroke: #4bb543;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.hidden {
+  display: none;
+}
+
+/*640*/
+@media (max-width: 40em) {
+  .mode-btn {
+    position: absolute;
+    top: -4.6rem;
+    left: 0;
+  }
+}
+
+/*480*/
+@media (max-width: 30em) {
+  .btn-m,
+  .btn-l {
+    width: 14rem;
+    border-radius: 7px;
+  }
+
+  .btn-el {
+    font-size: 1.8rem;
+    padding: 9px 0px;
+    width: 15rem;
+    border-radius: 7px;
+  }
+}

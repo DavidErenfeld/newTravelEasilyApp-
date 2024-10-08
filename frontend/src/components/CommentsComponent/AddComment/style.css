@@ -1,0 +1,32 @@
+.add-comment-section {
+  width: 50rem;
+  margin-bottom: 6rem;
+}
+
+.comment-input {
+  width: 100%;
+  min-height: 3rem;
+  max-height: 40rem;
+  resize: none;
+  overflow: hidden;
+  font-family: inherit;
+  font-size: 1.6rem;
+  padding: 1rem;
+  line-height: 1.5;
+  outline: none;
+  border-radius: 9px;
+}
+
+/*640*/
+@media (max-width: 40em) {
+  .comment-input {
+    width: 90%;
+  }
+}
+
+/*480*/
+@media (max-width: 30em) {
+  .comment-input {
+    width: 85%;
+  }
+}

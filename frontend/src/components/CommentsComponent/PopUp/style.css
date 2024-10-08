@@ -1,0 +1,38 @@
+.pop-up {
+  width: 35rem;
+  height: 15rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  background: #fff;
+  border-radius: 9px;
+  padding: 2rem 2rem 0.5rem 2rem;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* רקע שקוף כהה */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* מוודא שהפופ-אפ מעל האלמנטים האחרים */
+}
+
+.pop-up p {
+  font-size: 1.6rem;
+  grid-column: 1/-1;
+  text-align: center;
+  color: #232d59;
+  line-height: 1.4;
+}
+
+.pop-up-buttons {
+  grid-column: 1/-1;
+  justify-self: center;
+  display: flex;
+  gap: 3rem;
+}

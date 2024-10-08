@@ -1,0 +1,89 @@
+.update-trip-section {
+  position: relative;
+  width: 100%;
+  margin-top: 14rem;
+}
+
+.update-trip-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.add-image-icon-update-component {
+  position: absolute;
+  right: 8.5rem;
+  bottom: 0.8rem;
+}
+
+.update-details {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.update-trip-description {
+  width: 100%;
+  height: 30rem;
+  background-color: #075985;
+  color: #fff;
+  resize: none;
+  overflow: hidden;
+  font-family: inherit;
+  font-size: 1.6rem;
+  padding: 2rem 6rem;
+  line-height: 1.5;
+  outline: none;
+  border-radius: 9px;
+}
+
+.close-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.update-trip-container .scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  cursor: pointer;
+  font-size: 3.2rem;
+  padding: 10px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 9px;
+}
+
+.scroll-button.left {
+  left: 10px;
+}
+
+.scroll-button.right {
+  right: 10px;
+}
+
+.update-trip-section .btn-l {
+  align-self: center;
+}
+.update-trip-section .add-day-btn {
+  background: #bae6fd;
+  color: #232d59;
+}
+.update-trip-section .add-day-btn:hover {
+  background: #00a8ff;
+  color: #fff;
+}
+
+/*1024*/
+@media (max-width: 64em) {
+  .update-trip-section {
+    margin-top: 18rem;
+  }
+}

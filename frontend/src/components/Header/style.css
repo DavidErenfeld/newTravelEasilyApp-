@@ -1,0 +1,91 @@
+.main-page-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: #082f49;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  z-index: 1000;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.logo {
+  font-size: 3.6rem;
+}
+
+.user-main-page-img {
+  height: 4.2rem;
+  width: 4.2rem;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rem;
+}
+
+.menu-item {
+  font-size: 1.8rem;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item:hover {
+  color: #00a8ff;
+}
+
+.menu-item.search-item {
+  color: #00a8ff;
+}
+
+.menu-item.search-item:hover {
+  color: #fff;
+}
+
+.search-btn {
+  font-size: 1.4rem;
+  background-color: #fff;
+  color: #00a8ff;
+  padding: 1rem;
+  width: 10rem;
+  transition: background-color 0.3s ease;
+}
+
+/*880*/
+@media (max-width: 55em) {
+  .menu-item.connectet-menu {
+    display: none;
+  }
+}
+
+/*480*/
+@media (max-width: 30em) {
+  .main-page-header {
+    background-color: #0d4e79;
+  }
+
+  .logo {
+    font-size: 2.7rem;
+  }
+}
+
+/*344*/
+@media (max-width: 21.5em) {
+  .main-page-header {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .logo {
+    font-size: 2.2rem;
+  }
+}
