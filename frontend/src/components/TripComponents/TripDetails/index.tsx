@@ -100,7 +100,7 @@ const TripDetails = () => {
         alert("You are not authorized to delete this image.");
         return;
       }
-      const updatedTripPhotos = trip.tripPhotos.filter(
+      const updatedTripPhotos = trip.tripPhotos?.filter(
         (photoUrl) => photoUrl !== src
       );
 
@@ -124,7 +124,7 @@ const TripDetails = () => {
   return (
     <>
       <Header />
-      {trip?.tripPhotos?.length > 0 && !updateMode && (
+      {trip?.tripPhotos && trip?.tripPhotos?.length > 0 && !updateMode && (
         <div className="imeges-section">
           <ImageCarousel
             images={imageObjects}
