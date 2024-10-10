@@ -24,7 +24,7 @@ function addSubscriber(callback: (accessToken: string) => void): void {
 }
 
 export const apiClient = axios.create({
-  baseURL: "http://10.0.0.6:90",
+  baseURL: "https://evening-bayou-77034-176dc93fb1e1.herokuapp.com",
 });
 
 apiClient.interceptors.response.use(
