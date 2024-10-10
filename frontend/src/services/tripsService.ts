@@ -66,7 +66,7 @@ const getByOwnerId = (userId: string) => {
     apiClient
       .get(`/trips/owner/${userId}`, {
         headers: {
-          Authorization: `jwt ${accessToken}`,
+          Authorization: `jwt ${localStorage.getItem("accessToken")}`,
         },
       })
       .then((response) => {
@@ -86,7 +86,7 @@ const getByTripId = (tripId: string) => {
     apiClient
       .get(`/trips/FullTrip/${tripId}`, {
         headers: {
-          Authorization: `jwt ${accessToken}`,
+          Authorization: `jwt ${localStorage.getItem("accessToken")}`,
         },
       })
       .then((response) => {
@@ -104,11 +104,11 @@ const postTrip = (trip: ITrips) => {
   return new Promise<ITrips>((resolve, reject) => {
     console.log("Post...");
     console.log(trip);
-    console.log(accessToken);
+    console.log("accessToken = " + localStorage.getItem("accessToken"));
     apiClient
       .post("/trips", trip, {
         headers: {
-          Authorization: `jwt ${accessToken}`,
+          Authorization: `jwt ${localStorage.getItem("accessToken")}`,
         },
       })
       .then((response) => {
@@ -128,7 +128,7 @@ const updateTrip = (trip: IUpdateTrips) => {
     apiClient
       .put(`/trips/${trip._id}`, trip, {
         headers: {
-          Authorization: `jwt ${accessToken}`,
+          Authorization: `jwt ${localStorage.getItem("accessToken")}`,
         },
       })
       .then((response) => {
@@ -148,7 +148,7 @@ const deleteTrip = (tripId: string) => {
     apiClient
       .delete(`/trips/${tripId}`, {
         headers: {
-          Authorization: `jwt ${accessToken}`,
+          Authorization: `jwt ${localStorage.getItem("accessToken")}`,
         },
       })
       .then((response) => {
@@ -169,7 +169,7 @@ const searchTripsByParams = (params: Record<string, string | number>) => {
       .get("/trips//search/parameters", {
         params,
         headers: {
-          Authorization: `JWT ${accessToken}`, // הוספת הטוקן ל-Authorization header
+          Authorization: `JWT ${localStorage.getItem("accessToken")}`, // הוספת הטוקן ל-Authorization header
         },
       })
       .then((response) => {
@@ -188,17 +188,23 @@ const logout = () => {
     console.log("log out...");
     const refreshToken = localStorage.getItem("refreshToken");
     const accessToken = localStorage.getItem("accessToken");
-    if (!refreshToken) {
+    if (!localStorage.getItem("refreshToken")) {
+      console.log("refreshToken = " + refreshToken);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("loggedUserId");
+      localStorage.removeItem("imgUrl");
+      localStorage.removeItem("userName");
       reject(new Error("No refresh token available. Login required."));
       return;
     }
     apiClient
       .post(
-        `auth/logout`,
+        `/auth/logout`,
         {},
         {
           headers: {
-            Authorization: `JWT ${accessToken}`,
+            Authorization: `JWT ${localStorage.getItem("refreshToken")}`,
           },
         }
       )
@@ -227,7 +233,7 @@ const addComment = (tripId: string, comment: IComment) => {
         { comment },
         {
           headers: {
-            Authorization: `jwt ${accessToken}`,
+            Authorization: `jwt ${localStorage.getItem("accessToken")}`,
           },
         }
       )
@@ -247,7 +253,7 @@ const deleteComment = (tripId: string, commentId: string) => {
     apiClient
       .delete(`/trips/${tripId}/${commentId}`, {
         headers: {
-          Authorization: `jwt ${accessToken}`,
+          Authorization: `jwt ${localStorage.getItem("accessToken")}`,
         },
       })
       .then((response) => {
@@ -270,7 +276,7 @@ const addLike = (tripId: string) => {
         { owner: "david" },
         {
           headers: {
-            Authorization: `jwt ${accessToken}`,
+            Authorization: `jwt ${localStorage.getItem("accessToken")}`,
           },
         }
       )

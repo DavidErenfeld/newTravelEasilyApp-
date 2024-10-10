@@ -7,7 +7,7 @@ import axios, {
 
 export { CanceledError };
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
-  skipAuthRefresh: any;
+  skipAuthRefresh?: boolean;
   _retry?: boolean;
 }
 
@@ -24,8 +24,50 @@ function addSubscriber(callback: (accessToken: string) => void): void {
 }
 
 export const apiClient = axios.create({
-  baseURL: "https://evening-bayou-77034-176dc93fb1e1.herokuapp.com/",
+  baseURL: "https://evening-bayou-77034-176dc93fb1e1.herokuapp.com",
 });
+
+export async function refreshAccessToken(): Promise<string> {
+  const refreshToken: string | null = localStorage.getItem("refreshToken");
+  if (!localStorage.getItem("refreshToken"))
+    throw new Error("No refresh token available. Login required.");
+
+  try {
+    console.log(
+      "----------------localStorage refreshToken = " +
+        localStorage.getItem("refreshToken")
+    );
+    console.log("---------------- refreshToken = " + refreshToken);
+    const response: AxiosResponse = await axios.post(
+      `${apiClient.defaults.baseURL}/auth/refresh`,
+      {}, // גוף ריק
+      {
+        headers: {
+          Authorization: `JWT ${localStorage.getItem("accessToken")}`,
+        },
+      }
+    );
+
+    const { accessToken, refreshToken: newRefreshToken } = response.data;
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", newRefreshToken);
+    apiClient.defaults.headers.common["Authorization"] = `JWT ${accessToken}`;
+    onTokenRefreshed(accessToken);
+    return accessToken;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error(
+        "Refresh token error: ",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("An unknown error occurred: ", error);
+    }
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("accessToken");
+    throw new Error("Failed to refresh token, login required.");
+  }
+}
 
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
@@ -72,31 +114,4 @@ apiClient.interceptors.response.use(
   }
 );
 
-export async function refreshAccessToken(): Promise<string> {
-  const refreshToken: string | null = localStorage.getItem("refreshToken");
-  if (!refreshToken)
-    throw new Error("No refresh token available. Login required.");
-
-  try {
-    const response: AxiosResponse = await axios.post(
-      `${apiClient.defaults.baseURL}/auth/refresh`,
-      {},
-      {
-        headers: { Authorization: `JWT ${refreshToken}` },
-      }
-    );
-
-    const { accessToken, refreshToken: newRefreshToken } = response.data;
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", newRefreshToken);
-    apiClient.defaults.headers.common["Authorization"] = `JWT ${accessToken}`;
-    onTokenRefreshed(accessToken);
-    return accessToken;
-  } catch (error) {
-    console.error("Refresh token error: ", error);
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("accessToken");
-    throw new Error("Failed to refresh token, login required.");
-  }
-}
 export default apiClient;

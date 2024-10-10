@@ -19,7 +19,8 @@ export const loginUser = (user: IUser) => {
         localStorage.setItem("loggedUserId", response.data._id);
         localStorage.setItem("imgUrl", response.data.imgUrl);
         localStorage.setItem("userName", response.data.userName);
-        console.log(response);
+        console.log("accessToken = " + localStorage.getItem("accessToken"));
+        console.log("refreshToken = " + localStorage.getItem("refreshToken"));
         resolve(response.data);
       })
       .catch((error: any) => {
