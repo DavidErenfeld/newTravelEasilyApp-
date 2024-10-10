@@ -8,8 +8,6 @@ export interface IUpdateUser {
 }
 
 export const updateUser = (userId: string, user: IUpdateUser) => {
-  const accessToken = localStorage.getItem("token");
-
   return new Promise<IUpdateUser>((resolve, reject) => {
     console.log("Update user...");
     apiClient
@@ -20,7 +18,7 @@ export const updateUser = (userId: string, user: IUpdateUser) => {
         },
         {
           headers: {
-            Authorization: `jwt ${accessToken}`,
+            Authorization: `jwt ${localStorage.getItem("accessToken")}`,
           },
         }
       )
