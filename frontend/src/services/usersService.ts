@@ -9,7 +9,7 @@ export interface IUpdateUser {
 
 export const updateUser = (userId: string, user: IUpdateUser) => {
   return new Promise<IUpdateUser>((resolve, reject) => {
-    console.log("Update user...");
+    console.log("Update user....");
     apiClient
       .put(
         `/users/${userId}`,
@@ -18,7 +18,7 @@ export const updateUser = (userId: string, user: IUpdateUser) => {
         },
         {
           headers: {
-            Authorization: `jwt ${localStorage.getItem("accessToken")}`,
+            Authorization: `JWT ${localStorage.getItem("accessToken")}`,
           },
         }
       )

@@ -59,9 +59,6 @@ const Header = () => {
           <div className="menu">
             {localStorage.getItem("loggedUserId") ? (
               <div className="menu ">
-                <Link to="/login">
-                  <h1 className="menu-item">Sign in</h1>
-                </Link>
                 <Link to="/">
                   <h1 className="menu-item connectet-menu">Home</h1>
                 </Link>
