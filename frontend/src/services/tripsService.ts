@@ -187,6 +187,7 @@ const logout = () => {
   return new Promise<void>((resolve, reject) => {
     console.log("log out...");
     const refreshToken = localStorage.getItem("refreshToken");
+    const accessToken = localStorage.getItem("accessToken");
     if (!refreshToken) {
       reject(new Error("No refresh token available. Login required."));
       return;
@@ -197,7 +198,7 @@ const logout = () => {
         {},
         {
           headers: {
-            Authorization: `JWT ${refreshToken}`,
+            Authorization: `JWT ${accessToken}`,
           },
         }
       )
