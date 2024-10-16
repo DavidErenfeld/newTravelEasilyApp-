@@ -28,7 +28,8 @@ export const apiClient = axios.create({
 });
 
 export async function refreshAccessToken(): Promise<string> {
-  const refreshToken: string | null = localStorage.getItem("refreshToken");
+  // const refreshToken: string | null = localStorage.getItem("refreshToken");
+  console.log("refreshToken: " + localStorage.getItem("refreshToken"));
   if (!localStorage.getItem("refreshToken"))
     throw new Error("No refresh token available. Login required.");
 
@@ -37,7 +38,7 @@ export async function refreshAccessToken(): Promise<string> {
       "----------------localStorage refreshToken = " +
         localStorage.getItem("refreshToken")
     );
-    console.log("---------------- refreshToken = " + refreshToken);
+    // console.log("---------------- refreshToken = " + refreshToken);
     const response: AxiosResponse = await axios.post(
       `${apiClient.defaults.baseURL}/auth/refresh`,
       {}, // גוף ריק
@@ -63,7 +64,12 @@ export async function refreshAccessToken(): Promise<string> {
     } else {
       console.error("An unknown error occurred: ", error);
     }
+    console.log(
+      "refreshToken: line 68---------------- : " +
+        localStorage.getItem("refreshToken")
+    );
     localStorage.removeItem("refreshToken");
+    console.log("tokens removt = apiClint line 68----------------");
     localStorage.removeItem("accessToken");
     throw new Error("Failed to refresh token, login required.");
   }

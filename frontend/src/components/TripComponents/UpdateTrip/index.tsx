@@ -3,7 +3,10 @@ import { useState, useRef, useEffect } from "react";
 import tripsService, { ITrips } from "../../../services/tripsService";
 import { useNavigate } from "react-router-dom";
 import PopUp from "../../CommentsComponent/PopUp";
-import { uploadPhoto } from "../../../services/fileService";
+import {
+  uploadPhoto,
+  deletePhotoFromCloudinary,
+} from "../../../services/fileService";
 import ImageCarousel from "../../UIComponents/ImageCarousel";
 import AddImgs from "../../UIComponents/Icons/AddImage";
 import "./style.css";
@@ -84,8 +87,19 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
       setImages((prevImages) => [...prevImages, ...newImages]);
     }
   };
+  const deleteImage = async (src: string) => {
+    const isFromServer = images.find(
+      (image) => image.src === src
+    )?.isFromServer;
 
-  const deleteImage = (src: string) => {
+    // אם התמונה מ-Cloudinary (מהשרת), יש לחלץ את ה-publicId ולשלוח בקשה למחיקת התמונה מ-Cloudinary
+    if (isFromServer) {
+      if (src) {
+        await deletePhotoFromCloudinary(src);
+      }
+    }
+
+    // עדכון ה-state של התמונות בממשק
     setImages((prevImages) => {
       const imageToDelete = prevImages.find((image) => image.src === src);
       if (imageToDelete && !imageToDelete.isFromServer) {

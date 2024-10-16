@@ -9,6 +9,8 @@ import TripHeader from "../TripHeader/index.tsx";
 import "./style.css";
 import Header from "../../Header/index.tsx";
 import ImageCarousel from "../../UIComponents/ImageCarousel/index.tsx";
+import apiClient from "../../../services/apiClient.ts";
+import { deletePhotoFromCloudinary } from "../../../services/fileService.ts";
 
 interface Images {
   src: string;
@@ -100,23 +102,29 @@ const TripDetails = () => {
         alert("You are not authorized to delete this image.");
         return;
       }
-      const updatedTripPhotos = trip.tripPhotos?.filter(
-        (photoUrl) => photoUrl !== src
-      );
 
-      const updatedTrip = {
-        ...trip,
-        tripPhotos: updatedTripPhotos,
-      };
+      // חילוץ ה-publicId מכתובת ה-URL של התמונה
+      const publicId = src.split("/").pop()?.split(".")[0]; // מקבל את ה-publicId מתוך ה-URL
 
       try {
+        await deletePhotoFromCloudinary(src);
+
+        // עדכון מערך התמונות בטיול לאחר המחיקה
+        const updatedTripPhotos = trip.tripPhotos?.filter(
+          (photoUrl) => photoUrl !== src
+        );
+
+        const updatedTrip = {
+          ...trip,
+          tripPhotos: updatedTripPhotos,
+        };
+
+        // עדכון הטיול במסד הנתונים לאחר המחיקה
         await tripsService.updateTrip(updatedTrip);
-
         setTrip(updatedTrip);
-
         console.log("Image deleted and trip updated successfully.");
       } catch (error) {
-        console.error("Failed to update trip after deleting image:", error);
+        console.error("Failed to delete image:", error);
       }
     }
   };

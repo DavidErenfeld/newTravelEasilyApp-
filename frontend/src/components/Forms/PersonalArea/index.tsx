@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { deleteUser, updateUser } from "../../../services/usersService";
-import { uploadPhoto } from "../../../services/fileService";
+import {
+  uploadPhoto,
+  deletePhotoFromCloudinary,
+} from "../../../services/fileService";
 import CloseIcon from "../../UIComponents/Icons/Close";
 import LoadingDots from "../../UIComponents/Loader";
 import "./style.css";
@@ -49,12 +52,21 @@ function PersonalArea() {
   };
 
   const onClickSave = async () => {
-    if (imgFile) {
-      imgUrl = (await handleUploadImage(imgFile)) || "";
-    }
     try {
+      if (imgFile) {
+        // מחיקת תמונה קיימת מ-Cloudinary במידה וקיימת תמונה
+        if (imgUrl) {
+          await deletePhotoFromCloudinary(imgUrl);
+          console.log(`Previous image ${imgUrl} deleted successfully.`);
+        }
+
+        // העלאת תמונה חדשה
+        imgUrl = (await handleUploadImage(imgFile)) || "";
+      }
+
       const response = await updateUser(loggedUserId || "", { imgUrl: imgUrl });
       console.log(response);
+      localStorage.setItem("imgUrl", imgUrl); // עדכון התמונה החדשה ב-localStorage
       setButtonClicede(false);
     } catch (error) {
       console.log(error);
@@ -154,4 +166,5 @@ function PersonalArea() {
     </>
   );
 }
+
 export default PersonalArea;

@@ -57,6 +57,7 @@ const getAllTrips = () => {
   const req = apiClient.get<ITrips[]>("trips", {
     signal: abortController.signal,
   });
+  console.log("getAllTrips");
   return { req, abort: () => abortController.abort() };
 };
 
@@ -193,6 +194,7 @@ const logout = () => {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("loggedUserId");
+      console.log("localStorage removt = tripService line 196----------------");
       localStorage.removeItem("imgUrl");
       localStorage.removeItem("userName");
       reject(new Error("No refresh token available. Login required."));

@@ -55,6 +55,7 @@ export const deleteUser = (userId: string) => {
       console.log("User deleted successfully");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
+      console.log("localStorage removt = usersService line 58----------------");
       localStorage.removeItem("loggedUserId");
       localStorage.removeItem("imgUrl");
       localStorage.removeItem("userName");
