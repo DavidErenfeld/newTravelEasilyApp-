@@ -173,14 +173,19 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
     }
     setDeleteAction(null);
   };
-
   const deleteTrip = async () => {
     try {
+      // מחיקת כל התמונות של הטיול מ-Cloudinary
+      for (const image of trip.tripPhotos || []) {
+        await deletePhotoFromCloudinary(image);
+      }
+
+      // מחיקת הטיול מהשרת
       await tripsService.deleteTrip(trip._id!);
-      console.log("Trip deleted successfully.");
+      console.log("Trip and all its images deleted successfully.");
       navigate(-1);
     } catch (error) {
-      console.error("Failed to delete trip:", error);
+      console.error("Failed to delete trip or its images:", error);
     }
     setDeleteAction(null);
   };

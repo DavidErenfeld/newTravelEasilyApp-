@@ -8,6 +8,7 @@ import CloseIcon from "../../UIComponents/Icons/Close";
 import LoadingDots from "../../UIComponents/Loader";
 import "./style.css";
 import { useNavigate } from "react-router-dom";
+import tripsService from "../../../services/tripsService";
 
 function PersonalArea() {
   const imgRef = useRef<HTMLInputElement>(null);
@@ -43,6 +44,17 @@ function PersonalArea() {
     }
 
     try {
+      // שליפת כל הטיולים של המשתמש
+      const userTrips: any = await tripsService.getByOwnerId(userId);
+
+      // לולאה על כל טיול ומחיקת כל התמונות שלו מ-Cloudinary
+      for (const trip of userTrips) {
+        for (const image of trip.tripPhotos || []) {
+          await deletePhotoFromCloudinary(image); // מחיקת כל תמונה
+        }
+      }
+
+      // מחיקת המשתמש לאחר מחיקת התמונות
       await deleteUser(userId);
       console.log("User deleted and logged out successfully");
       navigate("/"); // נווט את המשתמש לדף הבית לאחר המחיקה וה-logout
