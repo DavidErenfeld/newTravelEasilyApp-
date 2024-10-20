@@ -205,11 +205,6 @@ const TripDetails = () => {
             />
           )
         )}
-        {/* {!updateMode && (
-          <section className="rating-section">
-            <Rating />
-          </section>
-        )} */}
       </section>
     </>
   );

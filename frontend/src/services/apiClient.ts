@@ -6,6 +6,7 @@ import axios, {
 } from "axios";
 
 export { CanceledError };
+
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   skipAuthRefresh?: boolean;
   _retry?: boolean;
@@ -29,16 +30,29 @@ export const apiClient = axios.create({
 
 export async function refreshAccessToken(): Promise<string> {
   const refreshToken = localStorage.getItem("refreshToken");
-  if (!refreshToken)
+  if (!refreshToken) {
+    console.log("No refresh token available, login required.");
     throw new Error("No refresh token available. Login required.");
+  }
 
   try {
+    console.log("Sending request to refresh access token...");
+
+    // העברת ה-refresh token ב-Authorization Header
     const response: AxiosResponse = await axios.post(
       `${apiClient.defaults.baseURL}/auth/refresh`,
-      { refreshToken } // מעביר את ה-refresh token בגוף הבקשה
+      {}, // גוף ריק
+      {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`, // שליחת ה-refresh token ב-Header
+        },
+      }
     );
 
     const { accessToken, refreshToken: newRefreshToken } = response.data;
+    console.log("New tokens received:", { accessToken, newRefreshToken });
+
+    // עדכון ה-Access Token וה-Refresh Token
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", newRefreshToken);
     apiClient.defaults.headers.common["Authorization"] = `JWT ${accessToken}`;
@@ -46,19 +60,8 @@ export async function refreshAccessToken(): Promise<string> {
     onTokenRefreshed(accessToken);
     return accessToken;
   } catch (error) {
-    // שיפור ניהול השגיאות
-    if (error instanceof AxiosError) {
-      console.error(
-        "Refresh token error: ",
-        error.response?.data || error.message
-      );
-    } else {
-      console.error("An unknown error occurred: ", error);
-    }
-
-    // כאן ניתן להציג התראה למשתמש לפני הסרת ה-tokens
+    console.error("Error refreshing token:", error);
     alert("Session expired, please log in again.");
-
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("accessToken");
     throw new Error("Failed to refresh token, login required.");
@@ -70,9 +73,8 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
 
-    // אם הבקשה לא דורשת רענון טוקן, לדלג על רענון
     if (originalRequest?.skipAuthRefresh) {
-      return Promise.reject(error); // דלג על רענון הטוקן
+      return Promise.reject(error);
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {

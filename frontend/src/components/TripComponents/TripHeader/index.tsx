@@ -12,7 +12,7 @@ const TripHeader = ({ trip }: TripHeaderProps) => {
         <span className="tag">{trip.typeTraveler}</span>
         <span className="tag">{trip.typeTrip}</span>
         <span className="tag">{trip.country}</span>
-        <span className="tag">{trip.numOfDays} days</span>
+        <span className="tag">{trip.tripDescription.length} days</span>
       </div>
     </>
   );

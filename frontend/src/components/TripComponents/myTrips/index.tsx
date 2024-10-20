@@ -1,4 +1,3 @@
-// MyTrips.tsx
 import { useEffect, useState } from "react";
 import TripCard from "../TripCard";
 import "./style.css";
