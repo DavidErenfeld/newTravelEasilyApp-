@@ -28,34 +28,25 @@ export const apiClient = axios.create({
 });
 
 export async function refreshAccessToken(): Promise<string> {
-  // const refreshToken: string | null = localStorage.getItem("refreshToken");
-  console.log("refreshToken: " + localStorage.getItem("refreshToken"));
-  if (!localStorage.getItem("refreshToken"))
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!refreshToken)
     throw new Error("No refresh token available. Login required.");
 
   try {
-    console.log(
-      "----------------localStorage refreshToken = " +
-        localStorage.getItem("refreshToken")
-    );
-    // console.log("---------------- refreshToken = " + refreshToken);
     const response: AxiosResponse = await axios.post(
       `${apiClient.defaults.baseURL}/auth/refresh`,
-      {}, // גוף ריק
-      {
-        headers: {
-          Authorization: `JWT ${localStorage.getItem("accessToken")}`,
-        },
-      }
+      { refreshToken } // מעביר את ה-refresh token בגוף הבקשה
     );
 
     const { accessToken, refreshToken: newRefreshToken } = response.data;
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", newRefreshToken);
     apiClient.defaults.headers.common["Authorization"] = `JWT ${accessToken}`;
+
     onTokenRefreshed(accessToken);
     return accessToken;
   } catch (error) {
+    // שיפור ניהול השגיאות
     if (error instanceof AxiosError) {
       console.error(
         "Refresh token error: ",
@@ -64,12 +55,11 @@ export async function refreshAccessToken(): Promise<string> {
     } else {
       console.error("An unknown error occurred: ", error);
     }
-    console.log(
-      "refreshToken: line 68---------------- : " +
-        localStorage.getItem("refreshToken")
-    );
+
+    // כאן ניתן להציג התראה למשתמש לפני הסרת ה-tokens
+    alert("Session expired, please log in again.");
+
     localStorage.removeItem("refreshToken");
-    console.log("tokens removt = apiClint line 68----------------");
     localStorage.removeItem("accessToken");
     throw new Error("Failed to refresh token, login required.");
   }

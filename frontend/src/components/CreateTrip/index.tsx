@@ -7,6 +7,7 @@ import AddImgs from "../UIComponents/Icons/AddImage";
 import ImageCarousel from "../UIComponents/ImageCarousel";
 import "./style.css";
 import SuccessMessage from "../UIComponents/SuccessMessage";
+import LoadingDots from "../UIComponents/Loader"; // יבוא של קומפוננטת ה-Loading
 
 interface TripDay {
   dayNum: number;
@@ -38,8 +39,8 @@ const CreateTrip: React.FC = () => {
   const imageRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
-
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // סטייט למניעת לחיצה כפולה
 
   const deleteImage = (src: string) => {
     setImages((prevImages) => {
@@ -98,7 +99,7 @@ const CreateTrip: React.FC = () => {
         }
       });
     };
-  }, [images]); // הוסף את images כתלות
+  }, [images]);
 
   const handleUploadImage = async (imgFile: File) => {
     try {
@@ -124,6 +125,10 @@ const CreateTrip: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return; // לא מאפשרים לחיצה נוספת בזמן שמירה
+
+    setIsSubmitting(true); // מחליף את הסטייט למצב של שליחה
+
     const errors: string[] = [];
     dayEdits.forEach((day, index) => {
       if (!day.description.trim()) {
@@ -135,6 +140,7 @@ const CreateTrip: React.FC = () => {
 
     if (errors.length > 0) {
       setErrorMessages(errors);
+      setIsSubmitting(false); // משחררים את הכפתור במקרה של שגיאות
       return;
     }
 
@@ -166,6 +172,8 @@ const CreateTrip: React.FC = () => {
       setShowSuccessMessage(true);
     } catch (error) {
       console.error("Failed to save the trip:", error);
+    } finally {
+      setIsSubmitting(false); // משחררים את הכפתור לאחר סיום שמירה
     }
   };
 
@@ -181,7 +189,17 @@ const CreateTrip: React.FC = () => {
           }}
         />
       )}
-      <section className="create-trip-section update-trip-section flex-stretch-column-gap section">
+      {/* אם isSubmitting הוא true, נציג את ה-overlay */}
+      {isSubmitting && (
+        <div className="loading-overlay">
+          <LoadingDots />
+        </div>
+      )}
+      <section
+        className={`create-trip-section update-trip-section flex-stretch-column-gap section ${
+          isSubmitting ? "blurred-background" : ""
+        }`}
+      >
         <div className="update-trip-container">
           <div className="update-details">
             <p className="day-name">Day {dayEdits[currentDayIndex].dayNum}</p>
@@ -226,9 +244,15 @@ const CreateTrip: React.FC = () => {
           </button>
         </div>
         {currentDayIndex === dayEdits.length - 1 && (
-          <button className="btn-l submit-trip-btn" onClick={handleSubmit}>
-            Submit
-          </button>
+          <>
+            <button
+              className="btn-l submit-trip-btn"
+              onClick={handleSubmit}
+              disabled={isSubmitting} // משביתים את הכפתור בעת שליחה
+            >
+              {isSubmitting ? "Submitting..." : "Submit"}
+            </button>
+          </>
         )}
 
         {images.length > 0 && (

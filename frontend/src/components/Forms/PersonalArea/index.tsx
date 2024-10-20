@@ -15,9 +15,10 @@ function PersonalArea() {
   const userName = localStorage.getItem("userName") || "";
   const [imgFile, setImgFile] = useState<File | null>(null);
   const [imgSrc, setImgSrc] = useState(localStorage.getItem("imgUrl"));
-  const [isButtonClicede, setButtonClicede] = useState(false);
+  const [isButtonClicked, setButtonClicked] = useState(false);
   const loggedUserId = localStorage.getItem("loggedUserId");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // ניהול טעינה כללית
+  const [isDeleting, setIsDeleting] = useState(false); // ניהול טעינה למחיקת משתמש
   const navigate = useNavigate();
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
@@ -25,7 +26,7 @@ function PersonalArea() {
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setButtonClicede(true);
+      setButtonClicked(true);
       setImgFile(e.target.files[0]);
       setImgSrc(URL.createObjectURL(e.target.files[0]));
     }
@@ -44,6 +45,7 @@ function PersonalArea() {
     }
 
     try {
+      setIsDeleting(true); // התחלת תהליך מחיקה
       // שליפת כל הטיולים של המשתמש
       const userTrips: any = await tripsService.getByOwnerId(userId);
 
@@ -60,11 +62,14 @@ function PersonalArea() {
       navigate("/"); // נווט את המשתמש לדף הבית לאחר המחיקה וה-logout
     } catch (error) {
       console.log("Error deleting user:", error);
+    } finally {
+      setIsDeleting(false); // סיום תהליך מחיקה
     }
   };
 
   const onClickSave = async () => {
     try {
+      setLoading(true); // התחלת תהליך שמירה
       if (imgFile) {
         // מחיקת תמונה קיימת מ-Cloudinary במידה וקיימת תמונה
         if (imgUrl) {
@@ -79,16 +84,18 @@ function PersonalArea() {
       const response = await updateUser(loggedUserId || "", { imgUrl: imgUrl });
       console.log(response);
       localStorage.setItem("imgUrl", imgUrl); // עדכון התמונה החדשה ב-localStorage
-      setButtonClicede(false);
+      setButtonClicked(false);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false); // סיום תהליך שמירה
     }
   };
 
   const handleUploadImage = async (imgFile: File) => {
     try {
       setLoading(true);
-      setButtonClicede(false);
+      setButtonClicked(false);
       const uploadedUrl = await uploadPhoto(imgFile);
       console.log(`Image uploaded successfully: ${uploadedUrl}`);
       return uploadedUrl;
@@ -135,6 +142,7 @@ function PersonalArea() {
         )}
         <h1 className="profile-name">{userName}</h1>
 
+        {/* הצגת טעינה בעת שמירה */}
         {loading ? (
           <div className="loader-section">
             <LoadingDots />
@@ -145,19 +153,28 @@ function PersonalArea() {
               Edit
             </button>
 
-            {isButtonClicede && (
+            {isButtonClicked && (
               <button onClick={onClickSave} className="btn-m">
                 Save
               </button>
             )}
           </div>
         )}
-        <button className="btn-m delete-btn" onClick={confirmDeleteUser}>
-          Delete account
-        </button>
+
+        {/* כפתור מחיקת חשבון */}
+        {isDeleting ? (
+          <div className="loader-section">
+            <LoadingDots />
+          </div>
+        ) : (
+          <button className="btn-m delete-btn" onClick={confirmDeleteUser}>
+            Delete account
+          </button>
+        )}
       </section>
 
-      {showDeletePopup && (
+      {/* פופאפ למחיקת חשבון */}
+      {showDeletePopup && !isDeleting && (
         <div className="popup-overlay">
           <div className="pop-up">
             <p>Are you sure you want to delete your account?</p>

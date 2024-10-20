@@ -29,6 +29,20 @@
   animation-delay: 0.3s;
 }
 
+/* styles.css */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.7); /* טשטוש הרקע */
+  z-index: 1000; /* כדי להיות מעל כל הרכיבים */
+}
+
 @keyframes fade {
   0%,
   100% {
