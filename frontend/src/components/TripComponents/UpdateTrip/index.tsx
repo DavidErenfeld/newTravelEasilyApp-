@@ -8,7 +8,7 @@ import {
 } from "../../../services/fileService";
 import ImageCarousel from "../../UIComponents/ImageCarousel";
 import AddImgs from "../../UIComponents/Icons/AddImage";
-import LoadingDots from "../../UIComponents/Loader"; // יבוא של קומפוננטת ה-Loading
+import LoadingDots from "../../UIComponents/Loader";
 import "./style.css";
 
 interface TripDay {
