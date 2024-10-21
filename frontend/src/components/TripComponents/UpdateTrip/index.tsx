@@ -1,4 +1,3 @@
-// UpdateTrip.tsx
 import { useState, useRef, useEffect } from "react";
 import tripsService, { ITrips } from "../../../services/tripsService";
 import { useNavigate } from "react-router-dom";
@@ -38,7 +37,6 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
   );
 
   const [deleteAction, setDeleteAction] = useState<"day" | "trip" | null>(null);
-
   const [images, setImages] = useState<ImageWithFile[]>([]);
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const imageRef = useRef<HTMLInputElement>(null);
@@ -228,6 +226,10 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
         tripDescription: dayEdits.map((day) => day.description),
         tripPhotos: updatedTripPhotos,
       };
+
+      // עדכון מספר הימים בהתאם לאורך התיאורים
+      updatedTrip.numOfDays = dayEdits.length;
+
       await tripsService.updateTrip(updatedTrip);
       console.log("Trip updated successfully.");
       navigate(-1); // לאחר השמירה, חוזרים לדף הקודם
