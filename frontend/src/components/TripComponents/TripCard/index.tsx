@@ -9,7 +9,7 @@ import { ITrips } from "../../../services/tripsService";
 import TripDescription from "../TripDescription";
 
 interface TripCardProps {
-  trip: ITrips;
+  trip: ITrips; // קיבלנו כבר את המידע של הטיול בקונטקסט או ב-LocalStorage
 }
 
 const TripCard = ({ trip }: TripCardProps) => {
@@ -29,7 +29,7 @@ const TripCard = ({ trip }: TripCardProps) => {
 
   const handleCommentsClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(`/searchTrip/trip/${trip._id}`);
+    navigate(`/searchTrip/trip/${trip._id}`); // במקרה של לחיצה ננווט לדף המפורט של הטיול
   };
 
   return (
@@ -43,9 +43,9 @@ const TripCard = ({ trip }: TripCardProps) => {
           />
           <p className="profile-name">{trip.userName}</p>
         </div>
-        {trip && <TripHeader trip={trip} />}
+        {trip && <TripHeader trip={trip} />} {/* פרטי הכותרת */}
         <div className="trip-description">
-          <TripDescription trip={trip} />
+          <TripDescription trip={trip} /> {/* תיאור הטיול */}
         </div>
         <div className="icons">
           <div className="icons-area">

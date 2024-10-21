@@ -2,3 +2,9 @@
   margin-top: 16rem;
   padding-bottom: 1rem;
 }
+.my-trips-loader.main-loader-section {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

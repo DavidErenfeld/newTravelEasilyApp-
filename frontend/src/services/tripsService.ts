@@ -16,14 +16,7 @@ export interface ITrips {
   numOfLikes: number;
   tripPhotos?: string[];
 
-  comments?: Array<{
-    _id?: string;
-    imgUrl?: string;
-    ownerId?: string;
-    owner?: string;
-    comment: string;
-    date: string;
-  }>;
+  comments: IComment[];
 
   likes?: Array<{
     owner: string;

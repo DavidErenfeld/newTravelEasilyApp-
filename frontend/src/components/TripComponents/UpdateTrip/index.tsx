@@ -1,14 +1,11 @@
+// UpdateTrip.tsx
 import { useState, useRef, useEffect } from "react";
 import tripsService, { ITrips } from "../../../services/tripsService";
 import { useNavigate } from "react-router-dom";
 import PopUp from "../../CommentsComponent/PopUp";
-import {
-  uploadPhoto,
-  deletePhotoFromCloudinary,
-} from "../../../services/fileService";
+import { uploadPhoto } from "../../../services/fileService";
 import ImageCarousel from "../../UIComponents/ImageCarousel";
 import AddImgs from "../../UIComponents/Icons/AddImage";
-import LoadingDots from "../../UIComponents/Loader";
 import "./style.css";
 
 interface TripDay {
@@ -41,12 +38,13 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
   );
 
   const [deleteAction, setDeleteAction] = useState<"day" | "trip" | null>(null);
+
   const [images, setImages] = useState<ImageWithFile[]>([]);
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false); // סטייט לניהול מצב השמירה
   const imageRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // אתחול התמונות עם התמונות הקיימות של הטיול
     const existingImages = (trip.tripPhotos || []).map((url) => ({
       src: url,
       alt: "Trip Photo",
@@ -65,6 +63,7 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
     };
   }, [images]);
 
+  // מניעת גלילה כאשר הפופ-אפ פתוח
   useEffect(() => {
     if (deleteAction) {
       document.body.classList.add("popup-open");
@@ -86,15 +85,7 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
     }
   };
 
-  const deleteImage = async (src: string) => {
-    const isFromServer = images.find(
-      (image) => image.src === src
-    )?.isFromServer;
-
-    if (isFromServer && src) {
-      await deletePhotoFromCloudinary(src);
-    }
-
+  const deleteImage = (src: string) => {
     setImages((prevImages) => {
       const imageToDelete = prevImages.find((image) => image.src === src);
       if (imageToDelete && !imageToDelete.isFromServer) {
@@ -170,20 +161,14 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
   };
 
   const deleteTrip = async () => {
-    setIsSubmitting(true); // מתחיל תהליך שליחה למחיקת טיול
     try {
-      for (const image of trip.tripPhotos || []) {
-        await deletePhotoFromCloudinary(image);
-      }
-
       await tripsService.deleteTrip(trip._id!);
-      console.log("Trip and all its images deleted successfully.");
+      console.log("Trip deleted successfully.");
       navigate(-1);
     } catch (error) {
-      console.error("Failed to delete trip or its images:", error);
-    } finally {
-      setIsSubmitting(false); // מסיים תהליך שליחה למחיקת טיול
+      console.error("Failed to delete trip:", error);
     }
+    setDeleteAction(null);
   };
 
   const handleDeleteDayClick = () => {
@@ -226,9 +211,11 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
   };
 
   const handleSave = async () => {
-    setIsSubmitting(true); // מתחיל תהליך שליחה
     try {
+      // העלאת תמונות חדשות
       const tripPhotos = await handleUploadImages();
+
+      // שילוב התמונות הקיימות עם החדשות
       const updatedTripPhotos = [
         ...images
           .filter((image) => image.isFromServer)
@@ -246,18 +233,12 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
       navigate(-1); // לאחר השמירה, חוזרים לדף הקודם
     } catch (error) {
       console.error("Failed to update trip:", error);
-    } finally {
-      setIsSubmitting(false); // מסיים תהליך שליחה
     }
   };
 
   return (
     <>
-      <section
-        className={`update-trip-section flex-stretch-column-gap section ${
-          isSubmitting ? "blurred-background" : ""
-        }`}
-      >
+      <section className="update-trip-section flex-stretch-column-gap section">
         {images.length > 0 && (
           <ImageCarousel
             images={images}
@@ -322,28 +303,21 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
         </button>
       </section>
 
-      {isSubmitting && (
-        <div className="loading-overlay">
-          <LoadingDots />
+      {deleteAction && (
+        <div className="popup-overlay">
+          <PopUp
+            message={
+              deleteAction === "day"
+                ? `Are you sure you want to delete day number ${dayEdits[currentDayIndex].dayNum}?`
+                : "Are you sure you want to delete the entire trip?"
+            }
+            handleCancelBtn={handleCancelDelete}
+            handleDeleteBtn={
+              deleteAction === "day" ? deleteCurrentDay : deleteTrip
+            }
+          />
         </div>
       )}
-
-      {!isSubmitting &&
-        deleteAction && ( // הצגת הפופאפ רק כאשר isSubmitting הוא false
-          <div className="popup-overlay">
-            <PopUp
-              message={
-                deleteAction === "day"
-                  ? `Are you sure you want to delete day number ${dayEdits[currentDayIndex].dayNum}?`
-                  : "Are you sure you want to delete the entire trip?"
-              }
-              handleCancelBtn={handleCancelDelete}
-              handleDeleteBtn={
-                deleteAction === "day" ? deleteCurrentDay : deleteTrip
-              }
-            />
-          </div>
-        )}
     </>
   );
 };

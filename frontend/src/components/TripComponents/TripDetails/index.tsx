@@ -9,7 +9,6 @@ import TripHeader from "../TripHeader/index.tsx";
 import "./style.css";
 import Header from "../../Header/index.tsx";
 import ImageCarousel from "../../UIComponents/ImageCarousel/index.tsx";
-import apiClient from "../../../services/apiClient.ts";
 import { deletePhotoFromCloudinary } from "../../../services/fileService.ts";
 
 interface Images {
@@ -29,17 +28,25 @@ const TripDetails = () => {
   const isThisTheOwner = loggedUserId !== trip?.owner?._id ? false : true;
 
   const [mMargin, setMMargin] = useState("");
+
   useEffect(() => {
     if (searchParams.get("viewMode") === "viewComments") {
       setViewMode("viewComments");
     }
   }, [searchParams]);
 
-  const loadTrip = async () => {
+  const loadTripFromServer = async () => {
     try {
       const data = await tripsService.getByTripId(id!);
       setTrip(data);
-      console.log(trip);
+
+      // עדכון localStorage עם המידע המעודכן מהשרת
+      const updatedTrips = [
+        ...JSON.parse(localStorage.getItem("trips") || "[]"),
+        data,
+      ];
+      localStorage.setItem("trips", JSON.stringify(updatedTrips));
+
       data.tripPhotos && data.tripPhotos?.length > 0
         ? setMMargin("")
         : setMMargin("m-margin");
@@ -48,6 +55,28 @@ const TripDetails = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadTrip = () => {
+    setLoading(true);
+
+    // נסה לטעון מה-localStorage
+    const savedTrips = localStorage.getItem("trips");
+    if (savedTrips) {
+      const trips: ITrips[] = JSON.parse(savedTrips);
+      const foundTrip = trips.find((t) => t._id === id);
+      if (foundTrip) {
+        setTrip(foundTrip);
+        setMMargin(
+          foundTrip.tripPhotos && foundTrip.tripPhotos.length > 0
+            ? ""
+            : "m-margin"
+        );
+      }
+    }
+
+    // בכל מקרה נבצע גם קריאה לשרת כדי לוודא שהמידע מעודכן
+    loadTripFromServer();
   };
 
   useEffect(() => {
@@ -73,8 +102,8 @@ const TripDetails = () => {
 
     try {
       await tripsService.addComment(trip?._id || "", commentToAdd);
-      const updatedTrip = await tripsService.getByTripId(trip?._id || "");
-      setTrip(updatedTrip);
+      // לאחר הוספת תגובה, טען מחדש את הטיול מהשרת
+      loadTripFromServer();
 
       if (!stayInViewMode) {
         setViewMode("main");
@@ -87,7 +116,7 @@ const TripDetails = () => {
   };
 
   const handleCommentDeleted = async () => {
-    await loadTrip();
+    loadTripFromServer();
   };
 
   const imageObjects: Images[] =
@@ -102,9 +131,6 @@ const TripDetails = () => {
         alert("You are not authorized to delete this image.");
         return;
       }
-
-      // חילוץ ה-publicId מכתובת ה-URL של התמונה
-      const publicId = src.split("/").pop()?.split(".")[0]; // מקבל את ה-publicId מתוך ה-URL
 
       try {
         await deletePhotoFromCloudinary(src);
@@ -122,6 +148,14 @@ const TripDetails = () => {
         // עדכון הטיול במסד הנתונים לאחר המחיקה
         await tripsService.updateTrip(updatedTrip);
         setTrip(updatedTrip);
+
+        // עדכון localStorage לאחר מחיקת התמונה
+        const savedTrips = JSON.parse(localStorage.getItem("trips") || "[]");
+        const updatedTrips = savedTrips.map((t: ITrips) =>
+          t._id === updatedTrip._id ? updatedTrip : t
+        );
+        localStorage.setItem("trips", JSON.stringify(updatedTrips));
+
         console.log("Image deleted and trip updated successfully.");
       } catch (error) {
         console.error("Failed to delete image:", error);
@@ -163,14 +197,12 @@ const TripDetails = () => {
                 >
                   Add Comment
                 </button>
-                {trip?.comments && trip.comments.length > 0 && (
-                  <button
-                    className="btn-l"
-                    onClick={() => setViewMode("viewComments")}
-                  >
-                    View Comments
-                  </button>
-                )}
+                <button
+                  className="btn-l"
+                  onClick={() => setViewMode("viewComments")}
+                >
+                  View Comments
+                </button>
               </section>
             )}
             {viewMode === "addComment" && (
@@ -186,7 +218,7 @@ const TripDetails = () => {
                     comments={trip.comments}
                     closeComments={() => setViewMode("main")}
                     tripId={trip._id}
-                    onCommentDeleted={handleCommentDeleted} // העברת הפונקציה כפרופס ל-ViewComment
+                    onCommentDeleted={handleCommentDeleted}
                   />
                 )}
                 <AddComment
