@@ -10,7 +10,7 @@ export interface ITrips {
   typeTraveler: string;
   country: string;
   typeTrip: string;
-  numOfDays: number;
+  numOfDays?: number;
   tripDescription: string[];
   numOfComments: number;
   numOfLikes: number;

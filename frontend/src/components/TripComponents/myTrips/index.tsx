@@ -49,7 +49,7 @@ const MyTrips = () => {
       <Header />
       <section className="trips-section section">
         {loading ? (
-          <div className="main-loader-section">
+          <div className="trips-loader main-loader-section">
             <LoadingDots />
           </div>
         ) : trips.length === 0 ? (

@@ -10,6 +10,7 @@ import "./style.css";
 import Header from "../../Header/index.tsx";
 import ImageCarousel from "../../UIComponents/ImageCarousel/index.tsx";
 import { deletePhotoFromCloudinary } from "../../../services/fileService.ts";
+import LoadingDots from "../../UIComponents/Loader"; // ייבוא רכיב ה-LoadingDots
 
 interface Images {
   src: string;
@@ -22,7 +23,7 @@ const TripDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const [trip, setTrip] = useState<ITrips | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // ניהול מצב טעינה
   const loggedUserName = localStorage.getItem("userName") || "";
   const loggedUserId = localStorage.getItem("loggedUserId") || "";
   const isThisTheOwner = loggedUserId !== trip?.owner?._id ? false : true;
@@ -111,7 +112,7 @@ const TripDetails = () => {
     } catch (err) {
       console.error("Failed to add comment:", err);
     } finally {
-      setLoading(false);
+      setLoading(false); // סיום מצב טעינה
     }
   };
 
@@ -166,78 +167,89 @@ const TripDetails = () => {
   return (
     <>
       <Header />
-      {trip?.tripPhotos && trip?.tripPhotos?.length > 0 && !updateMode && (
-        <div className="imeges-section">
-          <ImageCarousel
-            images={imageObjects}
-            deleteImage={deleteImage}
-            showDeleteButton={isThisTheOwner}
-          />
+      {loading ? ( // אם במצב טעינה, הצג את רכיב הטעינה
+        <div className="trips-loader main-loader-section">
+          <LoadingDots />
         </div>
-      )}
-      <section className="flex-center-column-large-gap section">
-        {!updateMode ? (
-          <div
-            className={`${mMargin} main-card-section flex-center-column-large-gap`}
-          >
-            {trip && <TripHeader trip={trip} />}
-            <section className="details-container flex-center-column">
-              {loggedUserId === trip?.owner?._id && (
-                <button className="btn-l mode-btn" onClick={onClickUpdateMode}>
-                  Editing Mode
-                </button>
-              )}
-              {trip && <TripDescription trip={trip} />}
-            </section>
-            {viewMode === "main" && (
-              <section className="btn-container-gap-m">
-                <button
-                  className="btn-l"
-                  onClick={() => setViewMode("addComment")}
-                >
-                  Add Comment
-                </button>
-                <button
-                  className="btn-l"
-                  onClick={() => setViewMode("viewComments")}
-                >
-                  View Comments
-                </button>
-              </section>
-            )}
-            {viewMode === "addComment" && (
-              <AddComment
-                onClickCancel={() => setViewMode("main")}
-                onSendComment={onClickSend}
+      ) : (
+        <>
+          {trip?.tripPhotos && trip?.tripPhotos?.length > 0 && !updateMode && (
+            <div className="imeges-section">
+              <ImageCarousel
+                images={imageObjects}
+                deleteImage={deleteImage}
+                showDeleteButton={isThisTheOwner}
               />
-            )}
-            {viewMode === "viewComments" && trip && (
-              <>
-                {trip._id && (
-                  <ViewComment
-                    comments={trip.comments}
-                    closeComments={() => setViewMode("main")}
-                    tripId={trip._id}
-                    onCommentDeleted={handleCommentDeleted}
+            </div>
+          )}
+          <section className="flex-center-column-large-gap section">
+            {!updateMode ? (
+              <div
+                className={`${mMargin} main-card-section flex-center-column-large-gap`}
+              >
+                {trip && <TripHeader trip={trip} />}
+                <section className="details-container flex-center-column">
+                  {loggedUserId === trip?.owner?._id && (
+                    <button
+                      className="btn-l mode-btn"
+                      onClick={onClickUpdateMode}
+                    >
+                      Editing Mode
+                    </button>
+                  )}
+                  {trip && <TripDescription trip={trip} />}
+                </section>
+                {viewMode === "main" && (
+                  <section className="btn-container-gap-m">
+                    <button
+                      className="btn-l"
+                      onClick={() => setViewMode("addComment")}
+                    >
+                      Add Comment
+                    </button>
+                    <button
+                      className="btn-l"
+                      onClick={() => setViewMode("viewComments")}
+                    >
+                      View Comments
+                    </button>
+                  </section>
+                )}
+                {viewMode === "addComment" && (
+                  <AddComment
+                    onClickCancel={() => setViewMode("main")}
+                    onSendComment={onClickSend}
                   />
                 )}
-                <AddComment
-                  onClickCancel={() => setViewMode("main")}
-                  onSendComment={(text) => onClickSend(text, true)}
+                {viewMode === "viewComments" && trip && (
+                  <>
+                    {trip._id && (
+                      <ViewComment
+                        comments={trip.comments}
+                        closeComments={() => setViewMode("main")}
+                        tripId={trip._id}
+                        onCommentDeleted={handleCommentDeleted}
+                      />
+                    )}
+                    <AddComment
+                      onClickCancel={() => setViewMode("main")}
+                      onSendComment={(text) => onClickSend(text, true)}
+                    />
+                  </>
+                )}
+              </div>
+            ) : (
+              trip && (
+                <UpdateTrip
+                  onClickClose={() => setUpdateMode(false)}
+                  trip={trip}
+                  onClickReadMode={onClickUpdateMode}
                 />
-              </>
+              )
             )}
-          </div>
-        ) : (
-          trip && (
-            <UpdateTrip
-              onClickClose={() => setUpdateMode(false)}
-              trip={trip}
-              onClickReadMode={onClickUpdateMode}
-            />
-          )
-        )}
-      </section>
+          </section>
+        </>
+      )}
     </>
   );
 };

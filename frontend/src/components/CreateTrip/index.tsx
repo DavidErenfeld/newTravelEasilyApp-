@@ -5,9 +5,9 @@ import { uploadPhoto } from "../../services/fileService";
 import Header from "../Header";
 import AddImgs from "../UIComponents/Icons/AddImage";
 import ImageCarousel from "../UIComponents/ImageCarousel";
+import LoadingDots from "../UIComponents/Loader"; // יבוא של קומפוננטת ה-Loading
 import "./style.css";
 import SuccessMessage from "../UIComponents/SuccessMessage";
-import LoadingDots from "../UIComponents/Loader"; // יבוא של קומפוננטת ה-Loading
 
 interface TripDay {
   dayNum: number;
@@ -36,11 +36,12 @@ const CreateTrip: React.FC = () => {
 
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [images, setImages] = useState<ImageWithFile[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false); // סטייט לניהול מצב השמירה
   const imageRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
+
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // סטייט למניעת לחיצה כפולה
 
   const deleteImage = (src: string) => {
     setImages((prevImages) => {
@@ -125,10 +126,6 @@ const CreateTrip: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (isSubmitting) return; // לא מאפשרים לחיצה נוספת בזמן שמירה
-
-    setIsSubmitting(true); // מחליף את הסטייט למצב של שליחה
-
     const errors: string[] = [];
     dayEdits.forEach((day, index) => {
       if (!day.description.trim()) {
@@ -140,12 +137,12 @@ const CreateTrip: React.FC = () => {
 
     if (errors.length > 0) {
       setErrorMessages(errors);
-      setIsSubmitting(false); // משחררים את הכפתור במקרה של שגיאות
       return;
     }
 
-    const tripData = dayEdits.map((day) => day.description);
+    setIsSubmitting(true); // מתחיל תהליך שליחה
 
+    const tripData = dayEdits.map((day) => day.description);
     const tripPhotos = await handleUploadImages();
 
     const trip: ITrips = {
@@ -158,6 +155,7 @@ const CreateTrip: React.FC = () => {
       numOfComments: 0,
       numOfLikes: 0,
       tripPhotos,
+      comments: [],
     };
 
     try {
@@ -173,7 +171,7 @@ const CreateTrip: React.FC = () => {
     } catch (error) {
       console.error("Failed to save the trip:", error);
     } finally {
-      setIsSubmitting(false); // משחררים את הכפתור לאחר סיום שמירה
+      setIsSubmitting(false); // מסיים תהליך שליחה
     }
   };
 
@@ -188,12 +186,6 @@ const CreateTrip: React.FC = () => {
             navigate("/");
           }}
         />
-      )}
-      {/* אם isSubmitting הוא true, נציג את ה-overlay */}
-      {isSubmitting && (
-        <div className="loading-overlay">
-          <LoadingDots />
-        </div>
       )}
       <section
         className={`create-trip-section update-trip-section flex-stretch-column-gap section ${
@@ -244,15 +236,9 @@ const CreateTrip: React.FC = () => {
           </button>
         </div>
         {currentDayIndex === dayEdits.length - 1 && (
-          <>
-            <button
-              className="btn-l submit-trip-btn"
-              onClick={handleSubmit}
-              disabled={isSubmitting} // משביתים את הכפתור בעת שליחה
-            >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </button>
-          </>
+          <button className="btn-l submit-trip-btn" onClick={handleSubmit}>
+            Submit
+          </button>
         )}
 
         {images.length > 0 && (
@@ -263,6 +249,12 @@ const CreateTrip: React.FC = () => {
           />
         )}
       </section>
+
+      {isSubmitting && (
+        <div className="loading-overlay">
+          <LoadingDots />
+        </div>
+      )}
     </>
   );
 };

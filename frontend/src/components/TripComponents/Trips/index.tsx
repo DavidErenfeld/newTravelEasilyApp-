@@ -40,7 +40,7 @@ const Trips = () => {
       <Header />
       <section className="trips-section section">
         {isLoading ? (
-          <div className="my-trips-loader main-loader-section">
+          <div className="trips-loader main-loader-section">
             <LoadingDots />
           </div>
         ) : error ? (
