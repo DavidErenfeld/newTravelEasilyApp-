@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import TripCard from "../TripCard";
 import "./style.css";
-import { useTrips } from "../../../Context/TripContext";
+import { useTrip } from "../../../Context/TripContext";
 import Header from "../../Header";
 import LoadingDots from "../../UIComponents/Loader";
 
 const Trips = () => {
-  const { trips, refreshTrips } = useTrips();
+  const { trips, refreshTrips } = useTrip();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null); // ניהול שגיאות
 
