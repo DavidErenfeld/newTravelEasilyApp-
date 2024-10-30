@@ -1,9 +1,8 @@
-// useTripData.tsx - Modifications for real-time updates
+// useTripData.tsx
 import { useState, useEffect } from "react";
 import tripsService, { ITrips } from "../services/tripsService";
 import io from "socket.io-client";
 
-// חיבור קבוע ל-Socket.IO עם כתובת ה-Heroku
 const socket = io("https://evening-bayou-77034-176dc93fb1e1.herokuapp.com");
 
 const useTripData = (tripId: string) => {
@@ -25,7 +24,7 @@ const useTripData = (tripId: string) => {
   useEffect(() => {
     loadTrip();
 
-    // Listen for specific trip updates in real-time
+    // Listen for real-time updates
     socket.on("tripUpdated", (updatedTrip: ITrips) => {
       if (updatedTrip._id === tripId) {
         setTrip(updatedTrip);
@@ -37,7 +36,7 @@ const useTripData = (tripId: string) => {
     };
   }, [tripId]);
 
-  return { trip, loading };
+  return { trip, loading, refreshTrip: loadTrip };
 };
 
 export default useTripData;

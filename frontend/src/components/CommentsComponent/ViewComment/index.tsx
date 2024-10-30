@@ -44,36 +44,41 @@ const ViewComment = ({
       <div className="close-comments">
         <CloseIcon color="#fff" onClose={closeComments} />
       </div>
-      {comments.map((comment, index) => (
-        <div key={index} className="comment-container">
-          <img
-            className="user-comment-img"
-            src={comment.imgUrl || "/images/user.png"}
-            alt="Profile"
-          />
-          <div className="comment-content">
-            <p>{comment.comment}</p>
-            <div className="comment-details">
-              <p className="comment-owner">{comment.owner}</p>
-              <p className="comment-date">{comment.date}</p>
-            </div>
-            {comment.ownerId === loggedUserId && (
-              // <button
-              //   className="delete-comment-btn"
-              //   onClick={() => handleDeleteComment(comment._id!)}
-              // >
-              //   Delete
-              // </button>
-              // <div className="delete-comment-icon">
-              <MdDelete
-                onClick={() => handleDeleteComment(comment._id!)}
-                className="delete-comment-icon"
+      {comments.map(
+        (comment, index) =>
+          comment ? ( // לוודא שהתגובה לא ריקה
+            <div key={index} className="comment-container">
+              <img
+                className="user-comment-img"
+                src={comment.imgUrl || "/images/user.png"}
+                alt="Profile"
               />
-              // </div>
-            )}
-          </div>
-        </div>
-      ))}
+              <div className="comment-content">
+                <p>{comment.comment}</p>
+                <div className="comment-details">
+                  <p className="comment-owner">{comment.owner}</p>
+                  <p className="comment-date">
+                    <p className="comment-date">
+                      <p className="comment-date">
+                        {new Date(comment.date).toLocaleDateString("en-US", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </p>
+                  </p>
+                </div>
+                {comment.ownerId === loggedUserId && (
+                  <MdDelete
+                    onClick={() => handleDeleteComment(comment._id!)}
+                    className="delete-comment-icon"
+                  />
+                )}
+              </div>
+            </div>
+          ) : null // במידה והתגובה ריקה, לא להציג אותה
+      )}
     </section>
   );
 };

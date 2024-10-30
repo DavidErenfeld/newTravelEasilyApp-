@@ -1,5 +1,9 @@
 // import { IComment } from "../components/searchTrip/SelectedTrip";
 import apiClient, { CanceledError } from "./apiClient";
+import io from "socket.io-client";
+
+// חיבור Socket.IO לשרת
+const socket = io("https://evening-bayou-77034-176dc93fb1e1.herokuapp.com");
 
 export { CanceledError };
 export interface ITrips {
@@ -234,6 +238,7 @@ const addComment = (tripId: string, comment: IComment) => {
       )
       .then((response) => {
         console.log(response);
+        socket.emit("addComment", { tripId, comment: response.data }); // שליחת אירוע סוקט
         resolve(response.data);
       })
       .catch((error) => {
@@ -242,6 +247,8 @@ const addComment = (tripId: string, comment: IComment) => {
       });
   });
 };
+
+// פונקציה למחיקת תגובה עם סוקט
 const deleteComment = (tripId: string, commentId: string) => {
   return new Promise<void>((resolve, reject) => {
     console.log("Delete Comment...");
@@ -253,6 +260,7 @@ const deleteComment = (tripId: string, commentId: string) => {
       })
       .then((response) => {
         console.log(response);
+        socket.emit("deleteComment", { tripId, commentId }); // שליחת אירוע סוקט למחיקה
         resolve();
       })
       .catch((error) => {
@@ -261,7 +269,6 @@ const deleteComment = (tripId: string, commentId: string) => {
       });
   });
 };
-
 const addLike = (tripId: string) => {
   return new Promise<ITrips>((resolve, reject) => {
     console.log("addLick...");

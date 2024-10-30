@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import "./style.css";
+import useSocket from "../../../Hooks/useSocket";
 
 interface AddCommentProps {
   onSendComment: (comment: string) => void;
@@ -8,7 +9,7 @@ interface AddCommentProps {
 
 const AddComment = ({ onSendComment, onClickCancel }: AddCommentProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [comment, setComment] = useState(""); 
+  const [comment, setComment] = useState("");
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -36,7 +37,7 @@ const AddComment = ({ onSendComment, onClickCancel }: AddCommentProps) => {
   const handleSend = () => {
     if (comment.trim() !== "") {
       onSendComment(comment);
-      setComment(""); 
+      setComment("");
     }
   };
 

@@ -11,6 +11,10 @@ import Header from "../../Header/index.tsx";
 import ImageCarousel from "../../UIComponents/ImageCarousel/index.tsx";
 import { deletePhotoFromCloudinary } from "../../../services/fileService.ts";
 import LoadingDots from "../../UIComponents/Loader"; // ייבוא רכיב ה-LoadingDots
+import io from "socket.io-client";
+
+// חיבור Socket.IO לשרת
+const socket = io("https://evening-bayou-77034-176dc93fb1e1.herokuapp.com");
 
 interface Images {
   src: string;
@@ -82,6 +86,32 @@ const TripDetails = () => {
 
   useEffect(() => {
     loadTrip();
+
+    socket.on("commentAdded", (commentData) => {
+      console.log("New comment received:", commentData); // בדיקה במבנה
+      if (commentData.tripId === id) {
+        setTrip((prevTrip) => ({
+          ...prevTrip!,
+          comments: [
+            ...prevTrip!.comments,
+            commentData.newComment, // וודא ששדה זה קיים ומכיל את המבנה הנכון
+          ],
+          numOfComments: prevTrip!.numOfComments + 1,
+        }));
+      }
+    });
+
+    socket.on("commentDeleted", (commentData) => {
+      console.log("Received commentDeleted event:", commentData);
+      if (commentData.tripId === id) {
+        loadTripFromServer(); // רענון המידע לאחר מחיקה
+      }
+    });
+
+    return () => {
+      socket.off("commentAdded");
+      socket.off("commentDeleted");
+    };
   }, [id]);
 
   const onClickUpdateMode = () => {
@@ -98,7 +128,7 @@ const TripDetails = () => {
       comment: newCommentText || "",
       owner: loggedUserName || "",
       date: new Date().toISOString(),
-      imgUrl: localStorage.getItem("imgUrl"),
+      imgUrl: localStorage.getItem("imgUrl") || "",
     };
 
     try {

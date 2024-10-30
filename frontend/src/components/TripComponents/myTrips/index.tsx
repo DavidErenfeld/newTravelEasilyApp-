@@ -5,6 +5,7 @@ import LoadingDots from "../../UIComponents/Loader";
 import tripsService, { ITrips } from "../../../services/tripsService";
 import Header from "../../Header";
 import { useNavigate } from "react-router-dom";
+import useSocket from "../../../Hooks/useSocket";
 
 const MyTrips = () => {
   const [trips, setTrips] = useState<ITrips[]>([]);
@@ -31,6 +32,12 @@ const MyTrips = () => {
       loadMyTrips();
     }
   }, [loggedUserId]);
+
+  useSocket("likeAdded", (newTrip) => {
+    setTrips((prevTrips) =>
+      prevTrips.map((trip) => (trip._id === newTrip._id ? newTrip : trip))
+    );
+  });
 
   const renderMyTrips = () => {
     return trips.map((trip) => (
