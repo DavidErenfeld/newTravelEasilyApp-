@@ -9,11 +9,11 @@ import { ITrips } from "../../../services/tripsService";
 import TripDescription from "../TripDescription";
 
 interface TripCardProps {
-  trip: ITrips; // קיבלנו כבר את המידע של הטיול בקונטקסט או ב-LocalStorage
+  trip: ITrips;
 }
 
 const TripCard = ({ trip }: TripCardProps) => {
-  const { isLiked, numOfLikes, toggleLike } = useTripCard(trip);
+  const { isLiked, numOfLikes, numOfComments, toggleLike } = useTripCard(trip); // כולל numOfComments
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const likeColor = isLiked ? "blue" : "white";
@@ -29,7 +29,7 @@ const TripCard = ({ trip }: TripCardProps) => {
 
   const handleCommentsClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(`/searchTrip/trip/${trip._id}`); // במקרה של לחיצה ננווט לדף המפורט של הטיול
+    navigate(`/searchTrip/trip/${trip._id}`);
   };
 
   return (
@@ -43,9 +43,9 @@ const TripCard = ({ trip }: TripCardProps) => {
           />
           <p className="profile-name">{trip.userName}</p>
         </div>
-        {trip && <TripHeader trip={trip} />} {/* פרטי הכותרת */}
+        {trip && <TripHeader trip={trip} />}
         <div className="trip-description">
-          <TripDescription trip={trip} /> {/* תיאור הטיול */}
+          <TripDescription trip={trip} />
         </div>
         <div className="icons">
           <div className="icons-area">
@@ -56,7 +56,7 @@ const TripCard = ({ trip }: TripCardProps) => {
             />
           </div>
           <div className="icons-area" onClick={handleCommentsClick}>
-            <span>{trip.numOfComments}</span>
+            <span>{numOfComments}</span>
             <FaRegComment />
           </div>
         </div>

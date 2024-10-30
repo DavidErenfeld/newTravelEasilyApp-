@@ -5,9 +5,10 @@ import { uploadPhoto } from "../../services/fileService";
 import Header from "../Header";
 import AddImgs from "../UIComponents/Icons/AddImage";
 import ImageCarousel from "../UIComponents/ImageCarousel";
-import LoadingDots from "../UIComponents/Loader"; // יבוא של קומפוננטת ה-Loading
+import LoadingDots from "../UIComponents/Loader";
 import "./style.css";
 import SuccessMessage from "../UIComponents/SuccessMessage";
+import useSocket from "../../Hooks/useSocket";
 
 interface TripDay {
   dayNum: number;
@@ -26,6 +27,7 @@ const CreateTrip: React.FC = () => {
   const { numberOfDays, selectedGroupType, selectedTripType, selectedCountry } =
     location.state || {};
 
+  // State variables
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
   const [dayEdits, setDayEdits] = useState<TripDay[]>(
     Array.from({ length: numberOfDays }, (_, index) => ({
@@ -33,26 +35,19 @@ const CreateTrip: React.FC = () => {
       description: "",
     }))
   );
-
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [images, setImages] = useState<ImageWithFile[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false); // סטייט לניהול מצב השמירה
-  const imageRef = useRef<HTMLInputElement>(null);
-
-  const navigate = useNavigate();
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  const deleteImage = (src: string) => {
-    setImages((prevImages) => {
-      const imageToDelete = prevImages.find((image) => image.src === src);
-      if (imageToDelete && !imageToDelete.isFromServer) {
-        URL.revokeObjectURL(imageToDelete.src);
-      }
-      return prevImages.filter((image) => image.src !== src);
-    });
-  };
+  // Refs and Navigation
+  const imageRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
+  // useSocket Hook for sending new trip event
+  const { send } = useSocket();
+
+  // Function to handle description change for each day
   const handleDescriptionChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
@@ -63,23 +58,13 @@ const CreateTrip: React.FC = () => {
     );
     setDayEdits(updatedDays);
 
+    // Clear error for the current day if there's an input
     const updatedErrors = [...errorMessages];
     updatedErrors[currentDayIndex] = "";
     setErrorMessages(updatedErrors);
   };
 
-  const goToNextDay = () => {
-    if (currentDayIndex < dayEdits.length - 1) {
-      setCurrentDayIndex(currentDayIndex + 1);
-    }
-  };
-
-  const goToPreviousDay = () => {
-    if (currentDayIndex > 0) {
-      setCurrentDayIndex(currentDayIndex - 1);
-    }
-  };
-
+  // Function to handle image change (adds images to state)
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
@@ -92,6 +77,18 @@ const CreateTrip: React.FC = () => {
     }
   };
 
+  // Function to delete an image from state
+  const deleteImage = (src: string) => {
+    setImages((prevImages) => {
+      const imageToDelete = prevImages.find((image) => image.src === src);
+      if (imageToDelete && !imageToDelete.isFromServer) {
+        URL.revokeObjectURL(imageToDelete.src);
+      }
+      return prevImages.filter((image) => image.src !== src);
+    });
+  };
+
+  // Cleanup image URLs when component unmounts
   useEffect(() => {
     return () => {
       images.forEach((image) => {
@@ -102,10 +99,10 @@ const CreateTrip: React.FC = () => {
     };
   }, [images]);
 
+  // Function to handle image upload to the server
   const handleUploadImage = async (imgFile: File) => {
     try {
       const uploadedUrl = await uploadPhoto(imgFile);
-      console.log(`Image uploaded successfully: ${uploadedUrl}`);
       return uploadedUrl;
     } catch (error) {
       console.error("Upload failed:", error);
@@ -114,6 +111,7 @@ const CreateTrip: React.FC = () => {
     }
   };
 
+  // Function to upload multiple images
   const handleUploadImages = async () => {
     const urls: string[] = [];
     for (const image of images) {
@@ -125,7 +123,9 @@ const CreateTrip: React.FC = () => {
     return urls;
   };
 
+  // Handle trip submission
   const handleSubmit = async () => {
+    // Validate each day's description
     const errors: string[] = [];
     dayEdits.forEach((day, index) => {
       if (!day.description.trim()) {
@@ -140,8 +140,9 @@ const CreateTrip: React.FC = () => {
       return;
     }
 
-    setIsSubmitting(true); // מתחיל תהליך שליחה
+    setIsSubmitting(true);
 
+    // Prepare trip data
     const tripData = dayEdits.map((day) => day.description);
     const tripPhotos = await handleUploadImages();
 
@@ -159,19 +160,13 @@ const CreateTrip: React.FC = () => {
     };
 
     try {
-      await tripsService.postTrip(trip);
-      console.log("Trip Data Submitted:", tripData);
-      console.log("Additional Data:", {
-        selectedGroupType,
-        selectedTripType,
-        selectedCountry,
-      });
-
+      const savedTrip = await tripsService.postTrip(trip);
+      send("newTrip", savedTrip); // Sending new trip event to server
       setShowSuccessMessage(true);
     } catch (error) {
       console.error("Failed to save the trip:", error);
     } finally {
-      setIsSubmitting(false); // מסיים תהליך שליחה
+      setIsSubmitting(false);
     }
   };
 
@@ -222,19 +217,20 @@ const CreateTrip: React.FC = () => {
 
           <button
             className="scroll-button left"
-            onClick={goToPreviousDay}
+            onClick={() => setCurrentDayIndex(currentDayIndex - 1)}
             disabled={currentDayIndex === 0}
           >
             ‹
           </button>
           <button
             className="scroll-button right"
-            onClick={goToNextDay}
+            onClick={() => setCurrentDayIndex(currentDayIndex + 1)}
             disabled={currentDayIndex === dayEdits.length - 1}
           >
             ›
           </button>
         </div>
+
         {currentDayIndex === dayEdits.length - 1 && (
           <button className="btn-l submit-trip-btn" onClick={handleSubmit}>
             Submit
@@ -250,11 +246,7 @@ const CreateTrip: React.FC = () => {
         )}
       </section>
 
-      {isSubmitting && (
-        <div className="loading-overlay">
-          <LoadingDots />
-        </div>
-      )}
+      {isSubmitting && <LoadingDots />}
     </>
   );
 };
