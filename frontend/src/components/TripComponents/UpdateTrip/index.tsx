@@ -1,16 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import tripsService, { ITrips } from "../../../services/tripsService";
 import { useNavigate } from "react-router-dom";
-import PopUp from "../../CommentsComponent/PopUp";
-import {
-  uploadPhoto,
-  deletePhotoFromCloudinary,
-} from "../../../services/fileService";
+import { deletePhotoFromCloudinary } from "../../../services/fileService";
+import tripsService, { ITrips } from "../../../services/tripsService";
 import ImageCarousel from "../../UIComponents/ImageCarousel";
 import AddImgs from "../../UIComponents/Icons/AddImage";
-import LoadingDots from "../../UIComponents/Loader"; // יבוא של קומפוננטת ה-Loading
-import "./style.css";
+import LoadingDots from "../../UIComponents/Loader";
 import useImageUpload from "../../../Hooks/useImageUpload";
+import PopUp from "../../CommentsComponent/PopUp";
+import "./style.css";
 
 interface TripDay {
   dayNum: number;
@@ -137,7 +134,7 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
   };
 
   const deleteTrip = async () => {
-    setIsSubmitting(true); // מתחיל תהליך שליחה למחיקת טיול
+    setIsSubmitting(true);
     try {
       for (const image of trip.tripPhotos || []) {
         await deletePhotoFromCloudinary(image);
@@ -149,7 +146,7 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
     } catch (error) {
       console.error("Failed to delete trip or its images:", error);
     } finally {
-      setIsSubmitting(false); // מסיים תהליך שליחה למחיקת טיול
+      setIsSubmitting(false);
     }
   };
 
@@ -166,7 +163,7 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
   };
 
   const handleSave = async () => {
-    setIsSubmitting(true); // מתחיל תהליך שליחה
+    setIsSubmitting(true);
     try {
       const tripPhotos = await uploadImages();
 
@@ -188,7 +185,7 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
     } catch (error) {
       console.error("Failed to update trip:", error);
     } finally {
-      setIsSubmitting(false); // מסיים תהליך שליחה
+      setIsSubmitting(false);
     }
   };
 
@@ -269,22 +266,21 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
         </div>
       )}
 
-      {!isSubmitting &&
-        deleteAction && ( // הצגת הפופאפ רק כאשר isSubmitting הוא false
-          <div className="popup-overlay">
-            <PopUp
-              message={
-                deleteAction === "day"
-                  ? `Are you sure you want to delete day number ${dayEdits[currentDayIndex].dayNum}?`
-                  : "Are you sure you want to delete the entire trip?"
-              }
-              handleCancelBtn={handleCancelDelete}
-              handleDeleteBtn={
-                deleteAction === "day" ? deleteCurrentDay : deleteTrip
-              }
-            />
-          </div>
-        )}
+      {!isSubmitting && deleteAction && (
+        <div className="popup-overlay">
+          <PopUp
+            message={
+              deleteAction === "day"
+                ? `Are you sure you want to delete day number ${dayEdits[currentDayIndex].dayNum}?`
+                : "Are you sure you want to delete the entire trip?"
+            }
+            handleCancelBtn={handleCancelDelete}
+            handleDeleteBtn={
+              deleteAction === "day" ? deleteCurrentDay : deleteTrip
+            }
+          />
+        </div>
+      )}
     </>
   );
 };

@@ -17,8 +17,8 @@ function PersonalArea() {
   const [imgSrc, setImgSrc] = useState(localStorage.getItem("imgUrl"));
   const [isButtonClicked, setButtonClicked] = useState(false);
   const loggedUserId = localStorage.getItem("loggedUserId");
-  const [loading, setLoading] = useState(false); // ניהול טעינה כללית
-  const [isDeleting, setIsDeleting] = useState(false); // ניהול טעינה למחיקת משתמש
+  const [loading, setLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
@@ -45,50 +45,47 @@ function PersonalArea() {
     }
 
     try {
-      setIsDeleting(true); // התחלת תהליך מחיקה
-      // שליפת כל הטיולים של המשתמש
+      setIsDeleting(true);
+
       const userTrips: any = await tripsService.getByOwnerId(userId);
 
-      // לולאה על כל טיול ומחיקת כל התמונות שלו מ-Cloudinary
       for (const trip of userTrips) {
         for (const image of trip.tripPhotos || []) {
-          await deletePhotoFromCloudinary(image); // מחיקת כל תמונה
+          await deletePhotoFromCloudinary(image);
         }
       }
 
-      // מחיקת המשתמש לאחר מחיקת התמונות
       await deleteUser(userId);
       console.log("User deleted and logged out successfully");
-      navigate("/"); // נווט את המשתמש לדף הבית לאחר המחיקה וה-logout
+      navigate("/");
     } catch (error) {
       console.log("Error deleting user:", error);
     } finally {
-      setIsDeleting(false); // סיום תהליך מחיקה
+      await deleteUser(userId);
+      setIsDeleting(false);
     }
   };
 
   const onClickSave = async () => {
     try {
-      setLoading(true); // התחלת תהליך שמירה
+      setLoading(true);
       if (imgFile) {
-        // מחיקת תמונה קיימת מ-Cloudinary במידה וקיימת תמונה
         if (imgUrl) {
           await deletePhotoFromCloudinary(imgUrl);
           console.log(`Previous image ${imgUrl} deleted successfully.`);
         }
 
-        // העלאת תמונה חדשה
         imgUrl = (await handleUploadImage(imgFile)) || "";
       }
 
       const response = await updateUser(loggedUserId || "", { imgUrl: imgUrl });
       console.log(response);
-      localStorage.setItem("imgUrl", imgUrl); // עדכון התמונה החדשה ב-localStorage
+      localStorage.setItem("imgUrl", imgUrl);
       setButtonClicked(false);
     } catch (error) {
       console.log(error);
     } finally {
-      setLoading(false); // סיום תהליך שמירה
+      setLoading(false);
     }
   };
 
@@ -142,7 +139,6 @@ function PersonalArea() {
         )}
         <h1 className="profile-name">{userName}</h1>
 
-        {/* הצגת טעינה בעת שמירה */}
         {loading ? (
           <div className="loader-section">
             <LoadingDots />
@@ -161,7 +157,6 @@ function PersonalArea() {
           </div>
         )}
 
-        {/* כפתור מחיקת חשבון */}
         {isDeleting ? (
           <div className="loader-section">
             <LoadingDots />
@@ -173,7 +168,6 @@ function PersonalArea() {
         )}
       </section>
 
-      {/* פופאפ למחיקת חשבון */}
       {showDeletePopup && !isDeleting && (
         <div className="popup-overlay">
           <div className="pop-up">

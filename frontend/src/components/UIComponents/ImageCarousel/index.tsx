@@ -3,8 +3,9 @@ import { MdDelete } from "react-icons/md";
 import "./style.css";
 import PopUp from "../../CommentsComponent/PopUp";
 import LoadingDots from "../../UIComponents/Loader"; // ייבוא רכיב הטעינה
+import { EMPTY_PATH } from "zod";
 
-interface Images {
+export interface Images {
   src: string;
   alt: string;
   isFromServer?: boolean;
@@ -12,7 +13,7 @@ interface Images {
 
 interface ImageCarouselProps {
   images: Images[];
-  deleteImage?: (src: string) => void;
+  deleteImage?: (image: Images) => void;
   showDeleteButton?: boolean;
 }
 
@@ -22,7 +23,7 @@ const ImageCarousel = ({
   showDeleteButton,
 }: ImageCarouselProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
+  const [imageToDelete, setImageToDelete] = useState<Images>();
   const [loading, setLoading] = useState(true); // מצב טעינה
 
   const scroll = (direction: "left" | "right") => {
@@ -54,6 +55,11 @@ const ImageCarousel = ({
     loadImages();
   }, [images]);
 
+  const emptyImage = {
+    src: "",
+    alt: "",
+    isFromServer: false,
+  };
   return (
     <>
       {loading ? ( // הצגת רכיב טעינה בזמן שהקומפוננטה בטעינה
@@ -64,7 +70,11 @@ const ImageCarousel = ({
         <div className="carousel-container">
           <div className="carousel" ref={carouselRef}>
             {images.map((image) => (
-              <div className="img-container" key={image.src}>
+              <div
+                className="img-container"
+                key={image.src}
+                onClick={() => console.log(image)}
+              >
                 <img
                   src={image.src}
                   alt={image.alt}
@@ -72,7 +82,9 @@ const ImageCarousel = ({
                 />
                 {showDeleteButton && deleteImage && (
                   <MdDelete
-                    onClick={() => setImageToDelete(image.src)}
+                    onClick={() => {
+                      deleteImage(image);
+                    }}
                     className="delete-icon"
                   />
                 )}
@@ -91,7 +103,7 @@ const ImageCarousel = ({
         </div>
       )}
 
-      {imageToDelete && (
+      {imageToDelete?.src === "" && (
         <div className="popup-overlay">
           <PopUp
             message="Are you sure you want to delete this image?"
@@ -99,9 +111,9 @@ const ImageCarousel = ({
               if (deleteImage) {
                 deleteImage(imageToDelete);
               }
-              setImageToDelete(null);
+              setImageToDelete(emptyImage);
             }}
-            handleCancelBtn={() => setImageToDelete(null)}
+            handleCancelBtn={() => setImageToDelete(emptyImage)}
           />
         </div>
       )}

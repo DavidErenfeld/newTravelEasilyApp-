@@ -10,7 +10,7 @@ import "./style.css";
 import Header from "../../Header/index.tsx";
 import ImageCarousel from "../../UIComponents/ImageCarousel/index.tsx";
 import { deletePhotoFromCloudinary } from "../../../services/fileService.ts";
-import LoadingDots from "../../UIComponents/Loader"; // ייבוא רכיב ה-LoadingDots
+import LoadingDots from "../../UIComponents/Loader";
 import io from "socket.io-client";
 
 // חיבור Socket.IO לשרת
@@ -27,7 +27,7 @@ const TripDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const [trip, setTrip] = useState<ITrips | null>(null);
-  const [loading, setLoading] = useState(true); // ניהול מצב טעינה
+  const [loading, setLoading] = useState(true);
   const loggedUserName = localStorage.getItem("userName") || "";
   const loggedUserId = localStorage.getItem("loggedUserId") || "";
   const isThisTheOwner = loggedUserId !== trip?.owner?._id ? false : true;
@@ -45,7 +45,6 @@ const TripDetails = () => {
       const data = await tripsService.getByTripId(id!);
       setTrip(data);
 
-      // עדכון localStorage עם המידע המעודכן מהשרת
       const updatedTrips = [
         ...JSON.parse(localStorage.getItem("trips") || "[]"),
         data,
@@ -65,7 +64,6 @@ const TripDetails = () => {
   const loadTrip = () => {
     setLoading(true);
 
-    // נסה לטעון מה-localStorage
     const savedTrips = localStorage.getItem("trips");
     if (savedTrips) {
       const trips: ITrips[] = JSON.parse(savedTrips);
@@ -80,7 +78,6 @@ const TripDetails = () => {
       }
     }
 
-    // בכל מקרה נבצע גם קריאה לשרת כדי לוודא שהמידע מעודכן
     loadTripFromServer();
   };
 
@@ -88,14 +85,11 @@ const TripDetails = () => {
     loadTrip();
 
     socket.on("commentAdded", (commentData) => {
-      console.log("New comment received:", commentData); // בדיקה במבנה
+      console.log("New comment received:", commentData);
       if (commentData.tripId === id) {
         setTrip((prevTrip) => ({
           ...prevTrip!,
-          comments: [
-            ...prevTrip!.comments,
-            commentData.newComment, // וודא ששדה זה קיים ומכיל את המבנה הנכון
-          ],
+          comments: [...prevTrip!.comments, commentData.newComment],
           numOfComments: prevTrip!.numOfComments + 1,
         }));
       }
@@ -104,27 +98,12 @@ const TripDetails = () => {
     socket.on("commentDeleted", (commentData) => {
       console.log("Received commentDeleted event:", commentData);
       if (commentData.tripId === id) {
-        loadTripFromServer(); // רענון המידע לאחר מחיקה
+        loadTripFromServer();
       }
     });
 
     return () => {
       socket.off("commentAdded");
-      socket.off("commentDeleted");
-    };
-  }, [id]);
-
-  useEffect(() => {
-    loadTrip();
-
-    socket.on("commentDeleted", (commentData) => {
-      console.log("Received commentDeleted event:", commentData);
-      if (commentData.tripId === id) {
-        loadTripFromServer(); // רענון המידע לאחר מחיקה
-      }
-    });
-
-    return () => {
       socket.off("commentDeleted");
     };
   }, [id, updateMode]);
@@ -148,7 +127,7 @@ const TripDetails = () => {
 
     try {
       await tripsService.addComment(trip?._id || "", commentToAdd);
-      // לאחר הוספת תגובה, טען מחדש את הטיול מהשרת
+
       loadTripFromServer();
 
       if (!stayInViewMode) {
@@ -157,7 +136,7 @@ const TripDetails = () => {
     } catch (err) {
       console.error("Failed to add comment:", err);
     } finally {
-      setLoading(false); // סיום מצב טעינה
+      setLoading(false);
     }
   };
 
@@ -171,48 +150,10 @@ const TripDetails = () => {
       alt: "Trip Photo",
     })) || [];
 
-  const deleteImage = async (src: string) => {
-    if (trip) {
-      if (loggedUserId !== trip?.owner?._id) {
-        alert("You are not authorized to delete this image.");
-        return;
-      }
-
-      try {
-        await deletePhotoFromCloudinary(src);
-
-        // עדכון מערך התמונות בטיול לאחר המחיקה
-        const updatedTripPhotos = trip.tripPhotos?.filter(
-          (photoUrl) => photoUrl !== src
-        );
-
-        const updatedTrip = {
-          ...trip,
-          tripPhotos: updatedTripPhotos,
-        };
-
-        // עדכון הטיול במסד הנתונים לאחר המחיקה
-        await tripsService.updateTrip(updatedTrip);
-        setTrip(updatedTrip);
-
-        // עדכון localStorage לאחר מחיקת התמונה
-        const savedTrips = JSON.parse(localStorage.getItem("trips") || "[]");
-        const updatedTrips = savedTrips.map((t: ITrips) =>
-          t._id === updatedTrip._id ? updatedTrip : t
-        );
-        localStorage.setItem("trips", JSON.stringify(updatedTrips));
-
-        console.log("Image deleted and trip updated successfully.");
-      } catch (error) {
-        console.error("Failed to delete image:", error);
-      }
-    }
-  };
-
   return (
     <>
       <Header />
-      {loading ? ( // אם במצב טעינה, הצג את רכיב הטעינה
+      {loading ? (
         <div className="trips-loader main-loader-section">
           <LoadingDots />
         </div>
@@ -222,7 +163,6 @@ const TripDetails = () => {
             <div className="imeges-section">
               <ImageCarousel
                 images={imageObjects}
-                deleteImage={deleteImage}
                 showDeleteButton={isThisTheOwner}
               />
             </div>
