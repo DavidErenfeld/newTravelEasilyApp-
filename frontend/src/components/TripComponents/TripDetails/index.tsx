@@ -114,6 +114,21 @@ const TripDetails = () => {
     };
   }, [id]);
 
+  useEffect(() => {
+    loadTrip();
+
+    socket.on("commentDeleted", (commentData) => {
+      console.log("Received commentDeleted event:", commentData);
+      if (commentData.tripId === id) {
+        loadTripFromServer(); // רענון המידע לאחר מחיקה
+      }
+    });
+
+    return () => {
+      socket.off("commentDeleted");
+    };
+  }, [id, updateMode]);
+
   const onClickUpdateMode = () => {
     setUpdateMode(!updateMode);
   };

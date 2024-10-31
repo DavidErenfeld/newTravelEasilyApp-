@@ -10,6 +10,7 @@ import ImageCarousel from "../../UIComponents/ImageCarousel";
 import AddImgs from "../../UIComponents/Icons/AddImage";
 import LoadingDots from "../../UIComponents/Loader"; // יבוא של קומפוננטת ה-Loading
 import "./style.css";
+import useImageUpload from "../../../Hooks/useImageUpload";
 
 interface TripDay {
   dayNum: number;
@@ -22,14 +23,22 @@ interface UpdateTripProps {
   onClickReadMode: () => void;
 }
 
-interface ImageWithFile {
-  file?: File;
-  src: string;
-  alt: string;
-  isFromServer?: boolean;
-}
-
 const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
+  const initialImages =
+    trip.tripPhotos?.map((url) => ({
+      src: url,
+      alt: "Trip Photo",
+      isFromServer: true,
+    })) || [];
+
+  const {
+    images,
+    handleImageChange,
+    deleteImage,
+    uploadImages,
+    openImageSelector,
+  } = useImageUpload(initialImages);
+
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
   const navigate = useNavigate();
 
@@ -41,19 +50,8 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
   );
 
   const [deleteAction, setDeleteAction] = useState<"day" | "trip" | null>(null);
-  const [images, setImages] = useState<ImageWithFile[]>([]);
-  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false); // סטייט לניהול מצב השמירה
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const imageRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const existingImages = (trip.tripPhotos || []).map((url) => ({
-      src: url,
-      alt: "Trip Photo",
-      isFromServer: true,
-    }));
-    setImages(existingImages);
-  }, [trip.tripPhotos]);
 
   useEffect(() => {
     return () => {
@@ -72,37 +70,6 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
       document.body.classList.remove("popup-open");
     }
   }, [deleteAction]);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      const newImages = files.map((file) => ({
-        file,
-        src: URL.createObjectURL(file),
-        alt: file.name || "Trip Image",
-        isFromServer: false,
-      }));
-      setImages((prevImages) => [...prevImages, ...newImages]);
-    }
-  };
-
-  const deleteImage = async (src: string) => {
-    const isFromServer = images.find(
-      (image) => image.src === src
-    )?.isFromServer;
-
-    if (isFromServer && src) {
-      await deletePhotoFromCloudinary(src);
-    }
-
-    setImages((prevImages) => {
-      const imageToDelete = prevImages.find((image) => image.src === src);
-      if (imageToDelete && !imageToDelete.isFromServer) {
-        URL.revokeObjectURL(imageToDelete.src);
-      }
-      return prevImages.filter((image) => image.src !== src);
-    });
-  };
 
   const handleDescriptionChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
@@ -198,37 +165,11 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
     setDeleteAction(null);
   };
 
-  const handleUploadImage = async (imgFile: File) => {
-    try {
-      const uploadedUrl = await uploadPhoto(imgFile);
-      console.log(`Image uploaded successfully: ${uploadedUrl}`);
-      return uploadedUrl;
-    } catch (error) {
-      console.error("Upload failed:", error);
-      alert("Failed to upload image.");
-      return null;
-    }
-  };
-
-  const handleUploadImages = async () => {
-    const newImages = images.filter((image) => !image.isFromServer);
-    const urls: string[] = [];
-    for (const image of newImages) {
-      if (image.file) {
-        const uploadedUrl = await handleUploadImage(image.file);
-        if (uploadedUrl) {
-          urls.push(uploadedUrl);
-        }
-      }
-    }
-    setUploadedUrls((prevUrls) => [...prevUrls, ...urls]);
-    return urls;
-  };
-
   const handleSave = async () => {
     setIsSubmitting(true); // מתחיל תהליך שליחה
     try {
-      const tripPhotos = await handleUploadImages();
+      const tripPhotos = await uploadImages();
+
       const updatedTripPhotos = [
         ...images
           .filter((image) => image.isFromServer)
@@ -243,7 +184,7 @@ const UpdateTrip = ({ trip, onClickReadMode }: UpdateTripProps) => {
       };
       await tripsService.updateTrip(updatedTrip);
       console.log("Trip updated successfully.");
-      navigate(-1); // לאחר השמירה, חוזרים לדף הקודם
+      onClickReadMode();
     } catch (error) {
       console.error("Failed to update trip:", error);
     } finally {
